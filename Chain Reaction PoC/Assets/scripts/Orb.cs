@@ -22,8 +22,19 @@ public class Orb : MonoBehaviour
     /// <summary>
     /// TODO
     /// </summary>
-    public void LoadOrb(OrbType orbType)
+    public void LoadOrb(OrbScriptable tooSet)
     {
-        /// todo
+        orbScript = tooSet;
+        gameObject.GetComponent<SpriteRenderer>().sprite = tooSet.orbColor;
+    }
+
+    public OrbType GetOrbType()
+    {
+        return orbScript.orbType;
+    }
+
+    public bool checkOrbType(OrbType check)
+    {
+        return check == orbScript.orbType;
     }
 }

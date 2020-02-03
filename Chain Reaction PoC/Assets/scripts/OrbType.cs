@@ -2,4 +2,4 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum OrbType { Green, Blue, Ornage, Red, Pink, ER, SR, BullshitPowerUp, ERROR }
+public enum OrbType { Green, Blue, Ornage, Red, Pink,Purple, ER, SR, BullshitPowerUp, ERROR }

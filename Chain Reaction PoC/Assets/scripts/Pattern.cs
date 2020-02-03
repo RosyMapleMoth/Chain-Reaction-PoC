@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public struct line
 {
-    public OrbType[] orbs;
+    public OrbScriptable[] orbs;
 }
 
 
