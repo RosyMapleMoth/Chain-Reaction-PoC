@@ -5,7 +5,7 @@ using UnityEngine;
 public class Orb : MonoBehaviour
 {
     public OrbScriptable orbScript;
-
+    public enum OrbState {Resting, Falling, Poping,}
 
     // Start is called before the first frame update
     void Start()
