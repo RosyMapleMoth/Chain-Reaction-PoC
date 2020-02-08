@@ -25,6 +25,8 @@ public class BoardManager : MonoBehaviour
     public LinkedList<GameObject>[] OobCols;
 
     public Sprite[] pickers;
+    public Queue<GameObject> toPopOrbs;
+    public Queue<Orb> evaluateQue;
 
 
     public Text countdown;
@@ -58,7 +60,9 @@ public class BoardManager : MonoBehaviour
 
         MakePattern(dropQue.Dequeue());
 
-        timeUntilDrop = 5f;
+        timeUntilDrop = 0f;
+        toPopOrbs = new Queue<GameObject>();
+        evaluateQue = new Queue<Orb>();
     }
 
 
@@ -94,7 +98,7 @@ public class BoardManager : MonoBehaviour
                 temp = Instantiate(orbPrefab, new Vector3(transform.position.x + SPAWN_X_VAL + r + .1f, transform.position.y + SPAWN_Y_Val +  reserveLines - 0.1f, -1), Quaternion.identity);
                 temp.GetComponent<Orb>().LoadOrb(patt.lines[c].orbs[r]);
                 temp.transform.SetParent(orbs.transform);
-                OobCols[r].AddLast(temp);
+                OobCols[r].AddFirst(temp);
             }
             reserveLines += 1;
         }
@@ -110,8 +114,8 @@ public class BoardManager : MonoBehaviour
                 orbs.transform.position = new Vector3(orbs.transform.position.x, orbs.transform.position.y - 1, orbs.transform.position.z);
                 for (int c = 0; c < 7; c++)
                 {
-                    Cols[c].AddLast(OobCols[c].First.Value);
-                    OobCols[c].RemoveFirst();
+                    Cols[c].AddFirst(OobCols[c].Last.Value);
+                    OobCols[c].RemoveLast();
                 }
             }
             reserveLines -= numLines;
@@ -125,17 +129,16 @@ public class BoardManager : MonoBehaviour
 
     public void DropOrbs(int Line)
     {
-
         while (GrabbedOrbs.childCount > 0)
         {
             GameObject ancorOrb;
             if (Cols[Line].Count > 0)
             {
-                 ancorOrb = Cols[Line].First.Value;
+                 ancorOrb = Cols[Line].Last.Value;
             }
             else
             {
-                ancorOrb = OobCols[Line].First.Value;
+                ancorOrb = OobCols[Line].Last.Value;
             }
 
 
@@ -144,11 +147,33 @@ public class BoardManager : MonoBehaviour
             moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ancorOrb.transform.position.z);
             moveingOrb.SetParent(orbs.transform);
 
-            Cols[Line].AddFirst(moveingOrb.gameObject);
+            Cols[Line].AddLast(moveingOrb.gameObject);
+
             HeldObrs--;
+
+            if (HeldObrs == 0)
+            {
+                EvaluateOrb(toPopOrbs, moveingOrb.GetComponent<Orb>(), moveingOrb.GetComponent<Orb>().orbScript.orbType);
+                Debug.Log(toPopOrbs.Count);
+                if (toPopOrbs.Count >= 3)
+                {
+                    while (toPopOrbs.Count > 0)
+                    {
+                        toPopOrbs.Peek().SetActive(false);
+                        Debug.Log(toPopOrbs.Peek().transform.position);
+                        toPopOrbs.Dequeue();
+                        Debug.Log(toPopOrbs.Count);
+                    }
+                }
+                else
+                {
+                    toPopOrbs.Clear();
+                }
+            }
         }
+
         heldType = OrbType.ERROR;
-        CheckPickerType();
+        CheckPickerType();        
     }
 
 
@@ -167,8 +192,8 @@ public class BoardManager : MonoBehaviour
         {
             if (HeldObrs == 0)
             {
-                GameObject temp = Cols[Line].First.Value;
-                Cols[Line].RemoveFirst();
+                GameObject temp = Cols[Line].Last.Value;
+                Cols[Line].RemoveLast();
                 heldType = temp.GetComponent<Orb>().GetOrbType();
                 StoreOrb(temp);
                 CheckPickerType();
@@ -177,10 +202,10 @@ public class BoardManager : MonoBehaviour
 
             else
             {
-                if (Cols[Line].First.Value.GetComponent<Orb>().checkOrbType(heldType))
+                if (Cols[Line].Last.Value.GetComponent<Orb>().checkOrbType(heldType))
                 {
-                    StoreOrb(Cols[Line].First.Value);
-                    Cols[Line].RemoveFirst();
+                    StoreOrb(Cols[Line].Last.Value);
+                    Cols[Line].RemoveLast();
                     AttemptGrabOrb(Line);
                 }
             }
@@ -191,7 +216,7 @@ public class BoardManager : MonoBehaviour
     {
         if (Cols[switcher.GetComponent<Selector>().GetCurCol()].Count > 0)
         {
-            selectLine.SetPosition(0, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), Cols[switcher.GetComponent<Selector>().GetCurCol()].First.Value.transform.position.y - 0.9f, selectLine.GetPosition(0).z));
+            selectLine.SetPosition(0, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), Cols[switcher.GetComponent<Selector>().GetCurCol()].Last.Value.transform.position.y - 0.9f, selectLine.GetPosition(0).z));
             selectLine.SetPosition(1, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
 
         }
@@ -233,6 +258,76 @@ public class BoardManager : MonoBehaviour
             case OrbType.ERROR:
                 switcher.GetComponentInChildren<SpriteRenderer>().sprite = pickers[0];
                 break;
+        }
+    }
+
+
+
+
+    public void EvaluateOrb(Queue<GameObject> localGroup, Orb curOrb, OrbType color)
+    {
+        Debug.Log("Checking orb " + gameObject.name);
+        if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Poping)
+        {
+            Debug.Log("orb " + gameObject.name + "has passed the pop check ");
+
+            localGroup.Enqueue(curOrb.gameObject);
+            curOrb.curState = Orb.OrbState.Poping;
+
+            int xLoc = Mathf.FloorToInt(curOrb.transform.localPosition.x);
+            int yLoc = Mathf.Abs(Mathf.CeilToInt(curOrb.transform.position.y) - 6);
+
+            Debug.Log("xLoc : "+xLoc+" yLoc : "+yLoc);
+
+
+            LinkedListNode<GameObject> node = Cols[xLoc].First;
+
+
+            for (int i = 0; i < yLoc; i++)
+            {
+                Debug.Log(node.Next == null);
+                node = node.Next;
+                Debug.Log(node.ToString());
+
+            }
+
+
+            
+
+            Debug.Log(node.ToString());
+
+
+            Debug.Log(yLoc + " < " + (Cols[xLoc].Count -1 )+ " = " + (yLoc < Cols[xLoc].Count -1).ToString());
+            if (yLoc < (Cols[xLoc].Count - 1))
+            {
+               
+                EvaluateOrb(localGroup, node.Next.Value.GetComponent<Orb>(), color);
+            }
+
+            Debug.Log(yLoc + " >  0 " + " = " + (yLoc > 0).ToString());
+            if (yLoc > 0)
+            {
+                EvaluateOrb(localGroup, node.Previous.Value.GetComponent<Orb>(), color);
+            }
+
+            if (xLoc < 6 && Cols[xLoc + 1].Count - 1> yLoc)
+            {
+                node = Cols[xLoc + 1].First;
+                for (int i = 0; i < yLoc; i++)
+                {
+                    node = node.Next;
+                }
+                EvaluateOrb(localGroup, node.Value.GetComponent<Orb>(), color);
+            }
+            if (xLoc > 1 && Cols[xLoc - 1].Count - 1 >yLoc)
+            {
+                node = Cols[xLoc - 1].First;
+                for (int i = 0; i < yLoc; i++)
+                {
+                    node = node.Next;
+                }
+                EvaluateOrb(localGroup, node.Value.GetComponent<Orb>(), color);
+            }
         }
     }
 }

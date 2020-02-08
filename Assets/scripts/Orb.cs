@@ -5,7 +5,8 @@ using UnityEngine;
 public class Orb : MonoBehaviour
 {
     public OrbScriptable orbScript;
-    public enum OrbState {Resting, Falling, Poping,}
+    public enum OrbState {Resting, Falling, Poping, Evaluating}
+    public OrbState curState = OrbState.Resting;
 
     // Start is called before the first frame update
     void Start()
@@ -16,7 +17,9 @@ public class Orb : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (curState == OrbState.Poping)
+        {
+        }
     }
 
     /// <summary>
@@ -37,4 +40,8 @@ public class Orb : MonoBehaviour
     {
         return check == orbScript.orbType;
     }
+
+
+
+
 }
