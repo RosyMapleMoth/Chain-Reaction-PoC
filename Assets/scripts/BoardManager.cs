@@ -33,6 +33,7 @@ public class BoardManager : MonoBehaviour
     public Transform GrabbedOrbs;
     public int orbIDNext;
 
+    public static int ORB_VIEW_LAYER = -3;
 
     private Queue<Pattern> dropQue;
 
@@ -90,6 +91,57 @@ public class BoardManager : MonoBehaviour
     }
 
 
+    private bool VertThree(Orb orb, OrbType color, int vertCount)
+    {
+
+
+
+        return false;
+    }
+
+    private void vertThreeAux()
+    {
+
+    }
+    private void checkForFalling()
+    {
+        for (int i = 0; i <= 6; i++)
+        {
+            LinkedListNode<GameObject> node = Cols[i].First;
+            if (node != null)
+            {
+                checkNode(node.Value, OobCols[i].Last.Value.transform.position);
+
+
+                while (node.Next != null)
+                {
+                    node = node.Next;
+                    checkNode(node.Value, node.Previous.Value.transform.position);
+                }
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Checks a single orb and isure it's relative position is exctly one unit below ancor in the y axie,
+    /// if this is not ture it will move orb to relative board position immedidly below ancor; 
+    /// </summary>
+    /// <param name="Orb">the game object of the orb to be evaluated</param>
+    /// <param name="ancor">The position to position derectly below: the last orb to be in the correct relative position in the same row</param>
+    private void checkNode(GameObject orb, Vector3 ancor)
+    {
+        Vector2 node_eval = orb.GetComponent<Orb>().GetRelPos();
+
+        if (orb.transform.position.y != ancor.y - 1)
+        {
+            orb.transform.position = new Vector3(orb.transform.position.x, ancor.y - 1, ORB_VIEW_LAYER);
+        }
+
+    }
+
+
+
     private void MakePattern(Pattern patt)
     {
         for (int c = 0; c < patt.lines.Length; c++)
@@ -98,9 +150,9 @@ public class BoardManager : MonoBehaviour
             {
                 GameObject temp;
 
-                temp = Instantiate(orbPrefab, new Vector3(transform.position.x + SPAWN_X_VAL + r + .1f, transform.position.y + SPAWN_Y_Val +  reserveLines - 0.1f, -1), Quaternion.identity);
-                temp.name = orbIDNext.ToString();
-                temp.transform.GetChild(0).GetComponentInChildren<Text>().text = orbIDNext.ToString();
+                temp = Instantiate(orbPrefab, new Vector3(transform.position.x + SPAWN_X_VAL + r + .1f, transform.position.y + SPAWN_Y_Val +  reserveLines - 0.1f, ORB_VIEW_LAYER), Quaternion.identity);
+                temp.name = "orb " + orbIDNext.ToString();
+                temp.transform.GetChild(0).GetComponentInChildren<Text>().text = temp.name;
                 orbIDNext = orbIDNext+1;
                 temp.GetComponent<Orb>().LoadOrb(patt.lines[c].orbs[r]);
                 temp.transform.SetParent(orbs.transform);
@@ -117,7 +169,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int i = 0; i < numLines; i++)
             {
-                orbs.transform.position = new Vector3(orbs.transform.position.x, orbs.transform.position.y - 1, orbs.transform.position.z);
+                orbs.transform.position = new Vector3(orbs.transform.position.x, orbs.transform.position.y - 1, ORB_VIEW_LAYER);
                 for (int c = 0; c < 7; c++)
                 {
                     Cols[c].AddFirst(OobCols[c].Last.Value);
@@ -128,9 +180,12 @@ public class BoardManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Error Droping line sugjestion insure pattern pool is not empty., fucntion exited halted with exception : " + e);
+            Debug.LogError("Error Droping line. insure pattern pool is not empty. fucntion halted with exception : " + e);
         }
     }
+
+
+
 
 
     public void DropOrbs(int Line)
@@ -150,7 +205,7 @@ public class BoardManager : MonoBehaviour
 
             Transform moveingOrb = GrabbedOrbs.GetChild(0);
 
-            moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ancorOrb.transform.position.z);
+            moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
             moveingOrb.SetParent(orbs.transform);
 
             Cols[Line].AddLast(moveingOrb.gameObject);
@@ -168,6 +223,7 @@ public class BoardManager : MonoBehaviour
                         Vector2 temp = toPopOrbs.Peek().GetComponent<Orb>().GetRelPos();
                         Cols[(int)temp.x].Remove(Cols[(int)temp.x].Find(toPopOrbs.Peek()));
                         Destroy(toPopOrbs.Dequeue());
+                        checkForFalling();
                     }
                 }
                 else
@@ -182,6 +238,12 @@ public class BoardManager : MonoBehaviour
 
         heldType = OrbType.ERROR;
         CheckPickerType();        
+    }
+
+
+    public void CheckFall()
+    {
+
     }
 
 
@@ -272,7 +334,7 @@ public class BoardManager : MonoBehaviour
 
 
 
-    public void EvaluateOrb(Queue<GameObject> localGroup, Orb curOrb, OrbType color)
+    public bool EvaluateOrb(Queue<GameObject> localGroup, Orb curOrb, OrbType color )
     {
         Debug.Log("orb " + curOrb.gameObject.name + " is attempting a pop check");
         if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Poping)
@@ -299,6 +361,12 @@ public class BoardManager : MonoBehaviour
                 Debug.Log("orb " + curOrb.gameObject.name + " is pop checking down");
                 EvaluateOrb(localGroup, node.Next.Value.GetComponent<Orb>(), color);
             }
+            else
+            {
+                VertThree(curOrb, color, 0);
+            }
+
+
 
             if ((int)temp.y > 0)
             {
@@ -306,7 +374,7 @@ public class BoardManager : MonoBehaviour
                 EvaluateOrb(localGroup, node.Previous.Value.GetComponent<Orb>(), color);
             }
 
-            if ((int)temp.x < 6 && Cols[(int)temp.x + 1].Count > (int)temp.y)
+            if ((int)temp.x <  6 && Cols[(int)temp.x + 1].Count > (int)temp.y)
             {
                 Debug.Log("orb " + curOrb.gameObject.name + " is pop checking right");
                 node = Cols[(int)temp.x + 1].First;
@@ -327,5 +395,6 @@ public class BoardManager : MonoBehaviour
                 EvaluateOrb(localGroup, node.Value.GetComponent<Orb>(), color);
             }
         }
+        return false;
     }
 }
