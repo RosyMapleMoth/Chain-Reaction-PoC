@@ -8,6 +8,7 @@ public class Orb : MonoBehaviour
     public enum OrbState {Resting, Falling, Poping, Evaluating}
     public OrbState curState = OrbState.Resting;
 
+
     // Start is called before the first frame update
     void Start()
     {
