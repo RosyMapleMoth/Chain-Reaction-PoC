@@ -42,6 +42,11 @@ public class Orb : MonoBehaviour
     }
 
 
+    public Vector2 curBoardPos()
+    {
+        return new Vector2(Mathf.FloorToInt(transform.localPosition.x), Mathf.Abs(Mathf.CeilToInt(transform.position.y) - 6));
+    }
+
 
 
 }

@@ -122,7 +122,7 @@ public class BoardManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("Error Droping line sugjestion insure pattern pool is not empty., fucntion exited halted with exception : " + e);
+            Debug.LogError("Error Droping line sugjestion insure pattern pool is not empty., fucntion exited halted with exception : " + e);
         }
     }
 
@@ -154,20 +154,20 @@ public class BoardManager : MonoBehaviour
             if (HeldObrs == 0)
             {
                 EvaluateOrb(toPopOrbs, moveingOrb.GetComponent<Orb>(), moveingOrb.GetComponent<Orb>().orbScript.orbType);
-                Debug.Log(toPopOrbs.Count);
                 if (toPopOrbs.Count >= 3)
                 {
                     while (toPopOrbs.Count > 0)
                     {
                         toPopOrbs.Peek().SetActive(false);
-                        Debug.Log(toPopOrbs.Peek().transform.position);
                         toPopOrbs.Dequeue();
-                        Debug.Log(toPopOrbs.Count);
                     }
                 }
                 else
                 {
-                    toPopOrbs.Clear();
+                    while (toPopOrbs.Count > 0)
+                    {
+                        toPopOrbs.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
+                    }
                 }
             }
         }
@@ -266,10 +266,9 @@ public class BoardManager : MonoBehaviour
 
     public void EvaluateOrb(Queue<GameObject> localGroup, Orb curOrb, OrbType color)
     {
-        Debug.Log("Checking orb " + gameObject.name);
         if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Poping)
         {
-            Debug.Log("orb " + gameObject.name + "has passed the pop check ");
+            Debug.Log("orb " + curOrb.gameObject.name + "has passed the pop check ");
 
             localGroup.Enqueue(curOrb.gameObject);
             curOrb.curState = Orb.OrbState.Poping;
@@ -277,7 +276,7 @@ public class BoardManager : MonoBehaviour
             int xLoc = Mathf.FloorToInt(curOrb.transform.localPosition.x);
             int yLoc = Mathf.Abs(Mathf.CeilToInt(curOrb.transform.position.y) - 6);
 
-            Debug.Log("xLoc : "+xLoc+" yLoc : "+yLoc);
+            Debug.Log("Orb has detected its current position as xLoc : "+xLoc+" yLoc : "+yLoc);
 
 
             LinkedListNode<GameObject> node = Cols[xLoc].First;
@@ -285,26 +284,15 @@ public class BoardManager : MonoBehaviour
 
             for (int i = 0; i < yLoc; i++)
             {
-                Debug.Log(node.Next == null);
                 node = node.Next;
-                Debug.Log(node.ToString());
 
             }
-
-
-            
-
-            Debug.Log(node.ToString());
-
-
-            Debug.Log(yLoc + " < " + (Cols[xLoc].Count -1 )+ " = " + (yLoc < Cols[xLoc].Count -1).ToString());
             if (yLoc < (Cols[xLoc].Count - 1))
             {
                
                 EvaluateOrb(localGroup, node.Next.Value.GetComponent<Orb>(), color);
             }
 
-            Debug.Log(yLoc + " >  0 " + " = " + (yLoc > 0).ToString());
             if (yLoc > 0)
             {
                 EvaluateOrb(localGroup, node.Previous.Value.GetComponent<Orb>(), color);
