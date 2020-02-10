@@ -42,7 +42,7 @@ public class Orb : MonoBehaviour
     }
 
 
-    public Vector2 curBoardPos()
+    public Vector2 GetRelPos()
     {
         return new Vector2(Mathf.FloorToInt(transform.localPosition.x), Mathf.Abs(Mathf.CeilToInt(transform.position.y) - 6));
     }

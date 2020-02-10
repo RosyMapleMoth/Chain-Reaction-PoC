@@ -159,6 +159,7 @@ public class BoardManager : MonoBehaviour
                     while (toPopOrbs.Count > 0)
                     {
                         toPopOrbs.Peek().SetActive(false);
+                        toPopOrbs.Peek().GetComponent<Orb>().GetRelPos();
                         toPopOrbs.Dequeue();
                     }
                 }
@@ -273,44 +274,42 @@ public class BoardManager : MonoBehaviour
             localGroup.Enqueue(curOrb.gameObject);
             curOrb.curState = Orb.OrbState.Poping;
 
-            int xLoc = Mathf.FloorToInt(curOrb.transform.localPosition.x);
-            int yLoc = Mathf.Abs(Mathf.CeilToInt(curOrb.transform.position.y) - 6);
 
-            Debug.Log("Orb has detected its current position as xLoc : "+xLoc+" yLoc : "+yLoc);
+            Vector2 temp = curOrb.GetRelPos();
 
 
-            LinkedListNode<GameObject> node = Cols[xLoc].First;
+            LinkedListNode<GameObject> node = Cols[(int)temp.x].First;
 
 
-            for (int i = 0; i < yLoc; i++)
+            for (int i = 0; i < (int)temp.y; i++)
             {
                 node = node.Next;
 
             }
-            if (yLoc < (Cols[xLoc].Count - 1))
+            if ((int)temp.y < (Cols[(int)temp.x].Count - 1))
             {
                
                 EvaluateOrb(localGroup, node.Next.Value.GetComponent<Orb>(), color);
             }
 
-            if (yLoc > 0)
+            if ((int)temp.y > 0)
             {
                 EvaluateOrb(localGroup, node.Previous.Value.GetComponent<Orb>(), color);
             }
 
-            if (xLoc < 6 && Cols[xLoc + 1].Count - 1> yLoc)
+            if ((int)temp.x < 6 && Cols[(int)temp.x + 1].Count - 1> (int)temp.y)
             {
-                node = Cols[xLoc + 1].First;
-                for (int i = 0; i < yLoc; i++)
+                node = Cols[(int)temp.x + 1].First;
+                for (int i = 0; i < (int)temp.y; i++)
                 {
                     node = node.Next;
                 }
                 EvaluateOrb(localGroup, node.Value.GetComponent<Orb>(), color);
             }
-            if (xLoc > 1 && Cols[xLoc - 1].Count - 1 >yLoc)
+            if ((int)temp.x > 1 && Cols[(int)temp.x - 1].Count - 1 > (int)temp.y)
             {
-                node = Cols[xLoc - 1].First;
-                for (int i = 0; i < yLoc; i++)
+                node = Cols[(int)temp.x - 1].First;
+                for (int i = 0; i < (int)temp.y; i++)
                 {
                     node = node.Next;
                 }
