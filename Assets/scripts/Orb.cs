@@ -8,6 +8,7 @@ public class Orb : MonoBehaviour
     public enum OrbState {Resting, Falling, Poping, Evaluating}
     public OrbState curState = OrbState.Resting;
 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -42,7 +43,7 @@ public class Orb : MonoBehaviour
     }
 
 
-    public Vector2 curBoardPos()
+    public Vector2 GetRelPos()
     {
         return new Vector2(Mathf.FloorToInt(transform.localPosition.x), Mathf.Abs(Mathf.CeilToInt(transform.position.y) - 6));
     }
