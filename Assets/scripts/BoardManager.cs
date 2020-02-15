@@ -25,13 +25,20 @@ public class BoardManager : MonoBehaviour
     public LinkedList<GameObject>[] OobCols;
 
     public Sprite[] pickers;
-    public Queue<GameObject> toPopOrbs;
-    public Queue<Orb> evaluateQue;
+
+    public float fallenPopConter = -2f;
+
+    private Queue<GameObject> toPopOrbs;
+    private LinkedList<GameObject> fallenOrbs;
+
+
+
 
 
     public Text countdown;
     public Transform GrabbedOrbs;
     public int orbIDNext;
+
 
     public static int ORB_VIEW_LAYER = -3;
 
@@ -64,8 +71,8 @@ public class BoardManager : MonoBehaviour
         MakePattern(dropQue.Dequeue());
 
         timeUntilDrop = 0f;
+        fallenOrbs = new LinkedList<GameObject>();
         toPopOrbs = new Queue<GameObject>();
-        evaluateQue = new Queue<Orb>();
 
     }
 
@@ -87,22 +94,70 @@ public class BoardManager : MonoBehaviour
         }
         countdown.text = timeUntilDrop.ToString("F2");
         updateSelectLineVert();
+
+
+        if (fallenPopConter > 0)
+        {
+            fallenPopConter -= Time.deltaTime;
+
+        }
+        else if (fallenPopConter > -1 && fallenPopConter <= 0)
+        {
+            Debug.Log("finish falling attempt");
+            fallfinish();
+            fallenPopConter = -1f;
+        }
     
     }
 
 
-    private bool VertThree(Orb orb, OrbType color, int vertCount)
+    /// <summary>
+    /// checks if their exists 3 orbs vertically of the same color connected to the current orb
+    /// </summary>
+    /// <param name="orb"> the starting orb to check vertically up and down from</param>
+    /// <param name="color">the color of the orb we are checking</param>
+    /// <returns></returns>
+    private bool VertThree(Orb orb, OrbType color)
     {
+        GameObject curNode = orb.gameObject;
+        GameObject lastNode = curNode;
 
+        int VertCount = 0;
+        
+        // how many orbs are vertically in a row down from starting orb
+        while (curNode != null && curNode.GetComponent<Orb>().GetOrbType() == color)
+        {
+            lastNode = curNode;
+            VertCount++;
+            Vector2 temp = curNode.GetComponent<Orb>().GetRelPos();
+            curNode = GetOrbAtRelPos((int)temp.x, (int)temp.y + 1);
+        }
 
-
-        return false;
+        // if we have already hit 3 vertical return ture
+        if (VertCount >= 3)
+        {
+            return true;
+        }
+        else // other wise how many orbs exist vertically up from the farest down orb 
+        {
+            VertCount = 0;
+            curNode = lastNode;
+            while (curNode != null && curNode.GetComponent<Orb>().GetOrbType() == color )
+            {
+                lastNode = curNode;
+                VertCount++;
+                Vector2 temp = curNode.GetComponent<Orb>().GetRelPos();
+                curNode = GetOrbAtRelPos((int)temp.x, (int)temp.y - 1);
+            }
+        }
+        return (VertCount >= 3);
     }
 
-    private void vertThreeAux()
-    {
 
-    }
+
+
+
+
     private void checkForFalling()
     {
         for (int i = 0; i <= 6; i++)
@@ -120,11 +175,16 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
+
+        if (fallenOrbs.Count > 0)
+        {
+            fallenPopConter = 1f;
+        }
     }
 
 
     /// <summary>
-    /// Checks a single orb and isure it's relative position is exctly one unit below ancor in the y axie,
+    /// Checks a single orb and insure it's relative position is exctly one unit below ancor in the y axie,
     /// if this is not ture it will move orb to relative board position immedidly below ancor; 
     /// </summary>
     /// <param name="Orb">the game object of the orb to be evaluated</param>
@@ -133,11 +193,55 @@ public class BoardManager : MonoBehaviour
     {
         Vector2 node_eval = orb.GetComponent<Orb>().GetRelPos();
 
-        if (orb.transform.position.y != ancor.y - 1)
+        if (Mathf.Ceil(orb.transform.position.y) != Mathf.Ceil(ancor.y - 1f))
         {
             orb.transform.position = new Vector3(orb.transform.position.x, ancor.y - 1, ORB_VIEW_LAYER);
+            Debug.Log("orb : " + orb.name + " is being added to fallenOrbs");
+            fallenOrbs.AddLast(orb);
         }
 
+    }
+
+    public void fallfinish()
+    {
+        while (fallenOrbs.Count > 0)
+        {
+            GameObject temp = fallenOrbs.First.Value;
+            fallenOrbs.RemoveFirst();
+            EvaluateOrb(toPopOrbs,temp.GetComponent<Orb>(), temp.GetComponent<Orb>().GetOrbType());
+            if (popCondition(toPopOrbs))
+            {
+                popOrbs();
+            }
+            else
+            {
+                while (toPopOrbs.Count > 0)
+                {
+                    toPopOrbs.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
+                }
+            }
+
+        }
+        
+    }
+
+
+    private bool popCondition(Queue<GameObject> groupingToEvaluate)
+    {
+        Queue<GameObject> GroupHolder = new Queue<GameObject>(groupingToEvaluate);
+        bool output;
+
+        while (GroupHolder.Count > 0)
+        {
+            GameObject OrbToCheck = GroupHolder.Dequeue();
+            output = VertThree(OrbToCheck.GetComponent<Orb>(), OrbToCheck.GetComponent<Orb>().GetOrbType());
+            if (output)
+            {
+                return output;
+            }
+            
+        }
+        return false;
     }
 
 
@@ -217,14 +321,7 @@ public class BoardManager : MonoBehaviour
                 EvaluateOrb(toPopOrbs, moveingOrb.GetComponent<Orb>(), moveingOrb.GetComponent<Orb>().orbScript.orbType);
                 if (toPopOrbs.Count >= 3)
                 {
-                    while (toPopOrbs.Count > 0)
-                    {
-                        toPopOrbs.Peek().SetActive(false);
-                        Vector2 temp = toPopOrbs.Peek().GetComponent<Orb>().GetRelPos();
-                        Cols[(int)temp.x].Remove(Cols[(int)temp.x].Find(toPopOrbs.Peek()));
-                        Destroy(toPopOrbs.Dequeue());
-                        checkForFalling();
-                    }
+                    popOrbs();
                 }
                 else
                 {
@@ -241,9 +338,17 @@ public class BoardManager : MonoBehaviour
     }
 
 
-    public void CheckFall()
-    {
 
+    public void popOrbs()
+    {
+        while (toPopOrbs.Count > 0)
+        {
+            toPopOrbs.Peek().SetActive(false);
+            Vector2 temp = toPopOrbs.Peek().GetComponent<Orb>().GetRelPos();
+            Cols[(int)temp.x].Remove(Cols[(int)temp.x].Find(toPopOrbs.Peek()));
+            Destroy(toPopOrbs.Dequeue());
+        }
+        checkForFalling();
     }
 
 
@@ -297,6 +402,12 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+
+
+    /// <summary>
+    /// Checks the currently held orb and changs the player cursers sprite accordingly
+    /// If run while not holding an orb the picker will be switched back to defult empty sprite 
+    /// </summary>
     private void CheckPickerType()
     {
         switch (heldType)
@@ -333,15 +444,22 @@ public class BoardManager : MonoBehaviour
 
 
 
-
-    public bool EvaluateOrb(Queue<GameObject> localGroup, Orb curOrb, OrbType color )
+    /// <summary>
+    /// Fills ReadyToPop with all touching orbs of type colo. all orbs already marked popping will be ignored.
+    /// XXX consider refactoring to remove ReadyToPop and replace it with a private var at class level.
+    /// </summary>
+    /// <param name="ReadyToPop">Where all touching orbs that are the same type as color will be stored</param>
+    /// <param name="curOrb">The current orb to evaluate</param>
+    /// <param name="color">the color of orbs we are looking for</param>
+    /// <returns></returns>
+    public bool EvaluateOrb(Queue<GameObject> ReadyToPop, Orb curOrb, OrbType color )
     {
         Debug.Log("orb " + curOrb.gameObject.name + " is attempting a pop check");
         if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Poping)
         {
             Debug.Log("orb " + curOrb.gameObject.name + "has passed the pop check ");
 
-            localGroup.Enqueue(curOrb.gameObject);
+            ReadyToPop.Enqueue(curOrb.gameObject);
             curOrb.curState = Orb.OrbState.Poping;
 
 
@@ -359,21 +477,13 @@ public class BoardManager : MonoBehaviour
             if ((int)temp.y < (Cols[(int)temp.x].Count - 1))
             {
                 Debug.Log("orb " + curOrb.gameObject.name + " is pop checking down");
-                EvaluateOrb(localGroup, node.Next.Value.GetComponent<Orb>(), color);
+                EvaluateOrb(ReadyToPop, node.Next.Value.GetComponent<Orb>(), color);
             }
-            else
-            {
-                VertThree(curOrb, color, 0);
-            }
-
-
-
             if ((int)temp.y > 0)
             {
                 Debug.Log("orb " + curOrb.gameObject.name + " is pop checking up");
-                EvaluateOrb(localGroup, node.Previous.Value.GetComponent<Orb>(), color);
+                EvaluateOrb(ReadyToPop, node.Previous.Value.GetComponent<Orb>(), color);
             }
-
             if ((int)temp.x <  6 && Cols[(int)temp.x + 1].Count > (int)temp.y)
             {
                 Debug.Log("orb " + curOrb.gameObject.name + " is pop checking right");
@@ -382,7 +492,7 @@ public class BoardManager : MonoBehaviour
                 {
                     node = node.Next;
                 }
-                EvaluateOrb(localGroup, node.Value.GetComponent<Orb>(), color);
+                EvaluateOrb(ReadyToPop, node.Value.GetComponent<Orb>(), color);
             }
             if ((int)temp.x >= 1 && Cols[(int)temp.x - 1].Count > (int)temp.y)
             {
@@ -392,9 +502,41 @@ public class BoardManager : MonoBehaviour
                 {
                     node = node.Next;
                 }
-                EvaluateOrb(localGroup, node.Value.GetComponent<Orb>(), color);
+                EvaluateOrb(ReadyToPop, node.Value.GetComponent<Orb>(), color);
             }
         }
         return false;
     }
+
+
+
+
+    /// <summary>
+    /// Finds the orb at the relative board position specifyed.
+    /// </summary>
+    /// <param name="x">the x of the orb in relative board position</param>
+    /// <param name="y">the y of the orb in relative board position</param>
+    /// <returns>the Orb stored at (x,y) in relative board position, if no orb exists returns null, if negative values are given return null</returns>
+    private GameObject GetOrbAtRelPos(int x, int y)
+    {
+        if (x < 0 || y < 0)
+        {
+            return null;
+        }
+
+        try
+        {
+            LinkedListNode<GameObject> node = Cols[x].First;
+            for (int i = 0; i < y; i++)
+            {
+                node = node.Next;
+            }
+            return node.Value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
 }
