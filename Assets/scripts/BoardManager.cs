@@ -44,7 +44,18 @@ public class BoardManager : MonoBehaviour
 
     private Queue<Pattern> dropQue;
 
-    // Start is called before the first frame update
+
+
+
+
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     void Start()
     {
         orbIDNext = 0;
@@ -77,7 +88,14 @@ public class BoardManager : MonoBehaviour
     }
 
 
-    // Update is called once per frame
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     void Update()
     {
         if (reserveLines < incomingLines)
@@ -104,11 +122,14 @@ public class BoardManager : MonoBehaviour
         else if (fallenPopConter > -1 && fallenPopConter <= 0)
         {
             Debug.Log("finish falling attempt");
+            fallenPopConter = -2f;
             fallfinish();
-            fallenPopConter = -1f;
         }
     
     }
+
+
+
 
 
     /// <summary>
@@ -157,7 +178,9 @@ public class BoardManager : MonoBehaviour
 
 
 
-
+    /// <summary>
+    /// 
+    /// </summary>
     private void checkForFalling()
     {
         for (int i = 0; i <= 6; i++)
@@ -178,9 +201,15 @@ public class BoardManager : MonoBehaviour
 
         if (fallenOrbs.Count > 0)
         {
-            fallenPopConter = 1f;
+            fallenPopConter = 3f;
         }
     }
+
+
+
+
+
+
 
 
     /// <summary>
@@ -191,8 +220,6 @@ public class BoardManager : MonoBehaviour
     /// <param name="ancor">The position to position derectly below: the last orb to be in the correct relative position in the same row</param>
     private void checkNode(GameObject orb, Vector3 ancor)
     {
-        Vector2 node_eval = orb.GetComponent<Orb>().GetRelPos();
-
         if (Mathf.Ceil(orb.transform.position.y) != Mathf.Ceil(ancor.y - 1f))
         {
             orb.transform.position = new Vector3(orb.transform.position.x, ancor.y - 1, ORB_VIEW_LAYER);
@@ -202,30 +229,63 @@ public class BoardManager : MonoBehaviour
 
     }
 
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void fallfinish()
     {
         while (fallenOrbs.Count > 0)
         {
-            GameObject temp = fallenOrbs.First.Value;
-            fallenOrbs.RemoveFirst();
-            EvaluateOrb(toPopOrbs,temp.GetComponent<Orb>(), temp.GetComponent<Orb>().GetOrbType());
-            if (popCondition(toPopOrbs))
+            try
             {
-                popOrbs();
-            }
-            else
-            {
-                while (toPopOrbs.Count > 0)
+                Queue<GameObject> localFallen = new Queue<GameObject>(); 
+                GameObject temp = fallenOrbs.First.Value;
+                fallenOrbs.RemoveFirst();
+                EvaluateOrb(localFallen, temp.GetComponent<Orb>(), temp.GetComponent<Orb>().GetOrbType());
+                if (popCondition(localFallen))
                 {
-                    toPopOrbs.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
+                    while (localFallen.Count > 0)
+                    {
+                        toPopOrbs.Enqueue(localFallen.Dequeue());
+                    }
                 }
+                else
+                {
+                    while (localFallen.Count > 0)
+                    {
+                        localFallen.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
+                    }
+                }
+            }
+            catch
+            {
+                fallenOrbs.RemoveFirst();
+                Debug.Log("ERROR null orb in fallen orbs");
             }
 
         }
-        
+        popOrbs();
     }
 
 
+
+
+
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="groupingToEvaluate"></param>
+    /// <returns></returns>
     private bool popCondition(Queue<GameObject> groupingToEvaluate)
     {
         Queue<GameObject> GroupHolder = new Queue<GameObject>(groupingToEvaluate);
@@ -245,7 +305,18 @@ public class BoardManager : MonoBehaviour
     }
 
 
+    
 
+
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="patt"></param>
     private void MakePattern(Pattern patt)
     {
         for (int c = 0; c < patt.lines.Length; c++)
@@ -267,6 +338,16 @@ public class BoardManager : MonoBehaviour
     }
 
 
+
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="numLines"></param>
     private void DropLine(int numLines)
     {
         try
@@ -292,6 +373,11 @@ public class BoardManager : MonoBehaviour
 
 
 
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="Line"></param>
     public void DropOrbs(int Line)
     {
         while (GrabbedOrbs.childCount > 0)
@@ -319,7 +405,7 @@ public class BoardManager : MonoBehaviour
             if (HeldObrs == 0)
             {
                 EvaluateOrb(toPopOrbs, moveingOrb.GetComponent<Orb>(), moveingOrb.GetComponent<Orb>().orbScript.orbType);
-                if (toPopOrbs.Count >= 3)
+                if (popCondition(toPopOrbs))
                 {
                     popOrbs();
                 }
@@ -338,7 +424,14 @@ public class BoardManager : MonoBehaviour
     }
 
 
+    
 
+
+
+
+    /// <summary>
+    /// destroys all orbs in toPopOrbs and calls checkforfalling
+    /// </summary>
     public void popOrbs()
     {
         while (toPopOrbs.Count > 0)
@@ -352,6 +445,15 @@ public class BoardManager : MonoBehaviour
     }
 
 
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="orb"></param>
     private void StoreOrb(GameObject orb)
     {
         orb.transform.SetParent(GrabbedOrbs);
@@ -361,6 +463,15 @@ public class BoardManager : MonoBehaviour
     }
 
 
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="Line"></param>
     public void AttemptGrabOrb(int Line)
     {
         if (Cols[Line].Count > 0 )
@@ -387,6 +498,17 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+
+
+
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void updateSelectLineVert()
     {
         if (Cols[switcher.GetComponent<Selector>().GetCurCol()].Count > 0)
@@ -401,6 +523,11 @@ public class BoardManager : MonoBehaviour
             selectLine.SetPosition(1, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
         }
     }
+
+
+
+
+
 
 
 
@@ -444,6 +571,15 @@ public class BoardManager : MonoBehaviour
 
 
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
     /// <summary>
     /// Fills ReadyToPop with all touching orbs of type colo. all orbs already marked popping will be ignored.
     /// XXX consider refactoring to remove ReadyToPop and replace it with a private var at class level.
@@ -511,6 +647,13 @@ public class BoardManager : MonoBehaviour
 
 
 
+    
+    
+    
+    
+    
+    
+    
     /// <summary>
     /// Finds the orb at the relative board position specifyed.
     /// </summary>
