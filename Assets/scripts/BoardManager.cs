@@ -31,6 +31,9 @@ public class BoardManager : MonoBehaviour
     private Queue<GameObject> toPopOrbs;
     private LinkedList<GameObject> fallenOrbs;
 
+    public Pattern[] PatternList;
+
+
 
 
 
@@ -100,7 +103,11 @@ public class BoardManager : MonoBehaviour
     {
         if (reserveLines < incomingLines)
         {
-            MakePattern(dropQue.Dequeue());
+            while (reserveLines < incomingLines)
+            {
+                addPatternToQue();
+                MakePattern(dropQue.Dequeue());
+            }
         }
 
         timeUntilDrop -= Time.deltaTime;
@@ -275,6 +282,17 @@ public class BoardManager : MonoBehaviour
 
 
 
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void addPatternToQue()
+    {
+        int pattern = (int)Mathf.Floor(UnityEngine.Random.Range(0, PatternList.Length));
+        dropQue.Enqueue(PatternList[pattern]);
+    }
 
 
 
