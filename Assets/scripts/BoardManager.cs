@@ -232,6 +232,7 @@ public class BoardManager : MonoBehaviour
             orb.transform.position = new Vector3(orb.transform.position.x, ancor.y - 1, ORB_VIEW_LAYER);
             Debug.Log("orb : " + orb.name + " is being added to fallenOrbs");
             fallenOrbs.AddLast(orb);
+            orb.GetComponentInChildren<Animator>().SetTrigger("spin");
         }
 
     }
@@ -266,6 +267,8 @@ public class BoardManager : MonoBehaviour
                     while (localFallen.Count > 0)
                     {
                         localFallen.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
+                        temp.GetComponentInChildren<Animator>().SetTrigger("Rest");
+
                     }
                 }
             }
