@@ -29,7 +29,7 @@ public class Orb : MonoBehaviour
     public void LoadOrb(OrbScriptable tooSet)
     {
         orbScript = tooSet;
-        gameObject.GetComponent<SpriteRenderer>().sprite = tooSet.orbColor;
+        gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = tooSet.orbColor;
     }
 
     public OrbType GetOrbType()

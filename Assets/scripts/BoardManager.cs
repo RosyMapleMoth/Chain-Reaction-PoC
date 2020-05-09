@@ -345,7 +345,7 @@ public class BoardManager : MonoBehaviour
 
                 temp = Instantiate(orbPrefab, new Vector3(transform.position.x + SPAWN_X_VAL + r + .1f, transform.position.y + SPAWN_Y_Val +  reserveLines - 0.1f, ORB_VIEW_LAYER), Quaternion.identity);
                 temp.name = "orb " + orbIDNext.ToString();
-                temp.transform.GetChild(0).GetComponentInChildren<Text>().text = temp.name;
+                temp.transform.GetChild(1).GetComponentInChildren<Text>().text = temp.name;
                 orbIDNext = orbIDNext+1;
                 temp.GetComponent<Orb>().LoadOrb(patt.lines[c].orbs[r]);
                 temp.transform.SetParent(orbs.transform);
