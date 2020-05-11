@@ -48,7 +48,7 @@ public class BoardManager : MonoBehaviour
     private Queue<Pattern> dropQue;
 
 
-
+    public float popOrbsTimer = -2;
 
 
 
@@ -132,6 +132,7 @@ public class BoardManager : MonoBehaviour
             fallenPopConter = -2f;
             fallfinish();
         }
+
     
     }
 
@@ -267,7 +268,7 @@ public class BoardManager : MonoBehaviour
                     while (localFallen.Count > 0)
                     {
                         localFallen.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
-                        temp.GetComponentInChildren<Animator>().SetTrigger("Rest");
+                        temp.GetComponentInChildren<Animator>().SetTrigger("rest");
 
                     }
                 }
