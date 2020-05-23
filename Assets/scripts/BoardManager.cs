@@ -43,6 +43,8 @@ public class BoardManager : MonoBehaviour
 
 
 
+    
+     
 
 
 
@@ -112,7 +114,7 @@ public class BoardManager : MonoBehaviour
         countdown.text = timeUntilDrop.ToString("F2");
 
         // player curser
-        updateSelectLineVert();
+        //updateSelectLineVert();
 
         // How we handel falling orbs
         if (fallenPopConter > 0)
@@ -301,6 +303,7 @@ public class BoardManager : MonoBehaviour
     {
         if (Mathf.Ceil(orb.transform.position.y) != Mathf.Ceil(ancor.y - 1f))
         {
+            Debug.Log(Mathf.Ceil(orb.transform.position.y) + " != " + Mathf.Ceil(ancor.y - 1f));
             orb.transform.position = new Vector3(orb.transform.position.x, ancor.y - 1, ORB_VIEW_LAYER);
             Debug.Log("orb : " + orb.name + " is being added to fallenOrbs");
             orb.GetComponent<Orb>().curState = Orb.OrbState.Falling;
@@ -467,46 +470,91 @@ public class BoardManager : MonoBehaviour
 
 
     /// <summary>
-    /// 
+    /// Drops held orbs on to the board
     /// </summary>
     /// <param name="Line"></param>
     public void DropOrbs(int Line)
     {
-        while (GrabbedOrbs.childCount > 0)
-        {
-            GameObject ancorOrb;
-            if (Cols[Line].Count > 0)
+        GameObject tempDad = Instantiate(new GameObject(),new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0), Quaternion.identity);
+        Queue<Transform> orbQues = new Queue<Transform>();
+
+
+        GameObject Gotoposition;
+        if (Cols[Line].Count > 0)
             {
-                 ancorOrb = Cols[Line].Last.Value;
+                Gotoposition = Cols[Line].Last.Value;
             }
             else
             {
-                ancorOrb = OobCols[Line].Last.Value;
+                Gotoposition = OobCols[Line].Last.Value;
             }
 
 
-            Transform moveingOrb = GrabbedOrbs.GetChild(0);
-            GrabbedOrbs.GetChild(0).GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
-            moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
-            moveingOrb.SetParent(orbs.transform);
-
-            Cols[Line].AddLast(moveingOrb.gameObject);
-            HeldObrs--;
-            Orb temp = moveingOrb.GetComponent<Orb>();
-            temp.curState = Orb.OrbState.Falling;
-            EvaluateOrbWoQue(temp,temp.GetOrbType(),Orb.OrbState.Evaluating);
-        }
-        if (!CurrentlyPoping)
+        
+        while (GrabbedOrbs.childCount > 0)
         {
-            evaluateOrbs();
-            CurrentlyPoping = true;
+            if (orbQues.Count > 0)
+            {
+                GrabbedOrbs.GetChild(0).transform.position = orbQues.Peek().position + new Vector3(0,-1,0);
+            }
+            else
+            {
+                GrabbedOrbs.GetChild(0).transform.position = new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0);
+            }
+            Cols[Line].AddLast(GrabbedOrbs.GetChild(0).gameObject);
+            orbQues.Enqueue(GrabbedOrbs.GetChild(0));
+            GrabbedOrbs.GetChild(0).SetParent(null);
         }
 
+        // 
+        foreach (Transform trans in orbQues)
+        {
+            trans.SetParent(tempDad.transform);
+            Orb tempOrb = trans.GetComponent<Orb>();
+            tempOrb.curState = Orb.OrbState.Falling;
+        }
+
+        // set up corutine for move aniamtion
+        IEnumerator MoveToSpot()
+        {
+            float elapsedTime = 0;
+            float waitTime = 0.25f - 0.01f*Cols[Line].Count;
+            Vector3 currentPos = tempDad.transform.position;
+    
+            while (elapsedTime < waitTime)
+            {
+                tempDad.transform.position = Vector3.Lerp(currentPos, Gotoposition.transform.position + new Vector3(0,-1,0), (elapsedTime / waitTime));
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }  
+            // Make sure we got there
+            tempDad.transform.position = Gotoposition.transform.position + new Vector3(0,-1,0);
+
+            while (tempDad.transform.childCount > 0)
+            {
+                tempDad.transform.GetChild(0).GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
+                tempDad.transform.GetChild(0).SetParent(orbs.transform);
+                Destroy(tempDad);
+
+            }
+            if (!CurrentlyPoping)
+            {
+                evaluateOrbs();
+            }
+            Debug.Log("Coroutine is done");
+            Debug.Log("");
+            yield return null;
+        }
+
+        StartCoroutine(MoveToSpot());
+
+        HeldObrs =0;
         heldType = OrbType.ERROR;
         CheckPickerType();        
     }
 
 
+    
 
 
 
@@ -560,34 +608,7 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
-
-
-
-
-
-
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public void updateSelectLineVert()
-    {
-        if (Cols[switcher.GetComponent<Selector>().GetCurCol()].Count > 0)
-        {
-            selectLine.SetPosition(0, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), Cols[switcher.GetComponent<Selector>().GetCurCol()].Last.Value.transform.position.y - 0.9f, selectLine.GetPosition(0).z));
-            selectLine.SetPosition(1, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
-
-        }
-        else
-        {
-            selectLine.SetPosition(0, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), 6, selectLine.GetPosition(0).z));
-            selectLine.SetPosition(1, new Vector3(-3f + switcher.GetComponent<Selector>().GetCurCol(), selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
-        }
-    }
-
-
+    
 
 
 
@@ -597,6 +618,7 @@ public class BoardManager : MonoBehaviour
     /// <summary>
     /// Checks the currently held orb and changs the player cursers sprite accordingly
     /// If run while not holding an orb the picker will be switched back to defult empty sprite 
+    /// TODO : move this to Selector script
     /// </summary>
     private void CheckPickerType()
     {
@@ -654,7 +676,7 @@ public class BoardManager : MonoBehaviour
     public bool EvaluateOrb(Queue<GameObject> ReadyToPop, Orb curOrb, OrbType color )
     {
         Debug.Log("orb " + curOrb.gameObject.name + " is attempting a pop check");
-        if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Evaluating)
+        if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Evaluating && curOrb.curState != Orb.OrbState.Falling)
         {
             Debug.Log("orb " + curOrb.gameObject.name + "has passed the pop check ");
 
@@ -713,7 +735,7 @@ public class BoardManager : MonoBehaviour
     public bool EvaluateOrbWoQue( Orb curOrb, OrbType color, Orb.OrbState CheckMakeType)
     {
         Debug.Log("orb " + curOrb.gameObject.name + " is attempting a pop check");
-        if (color == curOrb.orbScript.orbType && curOrb.curState != CheckMakeType)
+        if (color == curOrb.orbScript.orbType && curOrb.curState != CheckMakeType && curOrb.curState != Orb.OrbState.Falling)
         {
             Debug.Log("orb " + curOrb.gameObject.name + "has passed the pop check ");
 

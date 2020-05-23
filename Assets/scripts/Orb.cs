@@ -12,7 +12,7 @@ public class Orb : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+         curState = OrbState.Resting;
     }
 
     // Update is called once per frame
