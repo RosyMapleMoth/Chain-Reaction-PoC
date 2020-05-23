@@ -2,10 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour
 {
+    private const float POPTIMERMAX = 1;
+    private const float FALLTIMEMAX = 0.25f;
+
     private float timeUntilDrop = 0f;
     private int incomingLines = 1;
     private int reserveLines = 0;
@@ -15,41 +19,27 @@ public class BoardManager : MonoBehaviour
     static private int SPAWN_Y_Val = 7;
     static private int SPAWN_X_VAL = -4;
     public LineRenderer selectLine;
-
     public GameObject switcher;
     public int HeldObrs = 0;
     public OrbType heldType = OrbType.ERROR;
     public SpriteRenderer HeldOrbRep;
-
     public LinkedList<GameObject>[] Cols;
     public LinkedList<GameObject>[] OobCols;
-
     public Sprite[] pickers;
-
-    public float fallenPopConter = -2f;
-
+    public float fallenPopConter = - FALLTIMEMAX;
     private Queue<GameObject> toPopOrbs;
     private LinkedList<GameObject> fallenOrbs;
-
     public Pattern[] PatternList;
-
-
-
-
-
-
     public Text countdown;
     public Transform GrabbedOrbs;
     public int orbIDNext;
-
-
     public static int ORB_VIEW_LAYER = -3;
-
     private Queue<Pattern> dropQue;
+    public float popOrbsTimer = POPTIMERMAX;
+    public bool CurrentlyPoping;
+    public float ChainTimer;
 
-
-    public float popOrbsTimer = -2;
-
+    public float PopTimer = POPTIMERMAX;
 
 
 
@@ -57,7 +47,7 @@ public class BoardManager : MonoBehaviour
 
 
     /// <summary>
-    /// 
+    /// set up Col's
     /// </summary>
     void Start()
     {
@@ -87,12 +77,9 @@ public class BoardManager : MonoBehaviour
         timeUntilDrop = 0f;
         fallenOrbs = new LinkedList<GameObject>();
         toPopOrbs = new Queue<GameObject>();
+        CurrentlyPoping = false;
 
     }
-
-
-
-
 
 
 
@@ -101,6 +88,8 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     void Update()
     {
+
+        // Generate reserve Orbs
         if (reserveLines < incomingLines)
         {
             while (reserveLines < incomingLines)
@@ -110,6 +99,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
+        // calculation of when board should update
         timeUntilDrop -= Time.deltaTime;
         if (timeUntilDrop <= 0)
         {
@@ -117,10 +107,14 @@ public class BoardManager : MonoBehaviour
             DropLine(1);
             timeUntilDrop = 5f;
         }
+
+        // the countdown text 
         countdown.text = timeUntilDrop.ToString("F2");
+
+        // player curser
         updateSelectLineVert();
 
-
+        // How we handel falling orbs
         if (fallenPopConter > 0)
         {
             fallenPopConter -= Time.deltaTime;
@@ -129,15 +123,92 @@ public class BoardManager : MonoBehaviour
         else if (fallenPopConter > -1 && fallenPopConter <= 0)
         {
             Debug.Log("finish falling attempt");
-            fallenPopConter = -2f;
+            fallenPopConter = -FALLTIMEMAX;
             fallfinish();
         }
 
-    
+
+        // if we are counting down to a pop'
+        if(CurrentlyPoping)
+            if (PopTimer > 0)
+            {
+                PopTimer -= Time.deltaTime;        
+            }
+            else 
+            {
+                CurrentlyPoping = false;
+                endPopingOrbs();
+                checkForFalling();
+                evaluateOrbs();
+                PopTimer = POPTIMERMAX;
+            }
+    }
+
+    private void evaluateOrbs()
+    {
+        foreach (LinkedList<GameObject> Col in Cols) 
+        {
+            foreach (GameObject orb in Col) 
+            {
+                Orb temp = orb.GetComponent<Orb>();
+                if (temp.curState == Orb.OrbState.Evaluating)
+                {
+                    if (VertThree(temp,temp.GetOrbType()))
+                    {
+                        EvaluateOrbWoQue(temp,temp.GetOrbType(),Orb.OrbState.ToPop);
+                    } 
+                    else
+                    {
+                        temp.curState = Orb.OrbState.Resting;
+                    }
+                }
+            } 
+        }
+        Debug.Log("check done");
+        startPopingOrbs();
+    }
+
+    private void startPopingOrbs()
+    {
+        // check all movied 
+        foreach (LinkedList<GameObject> Col in Cols) 
+        {
+            foreach (GameObject orb in Col) 
+            {
+                Orb temporb = orb.GetComponent<Orb>();
+                if (temporb.curState == Orb.OrbState.ToPop)
+                {
+                    orb.GetComponentInChildren<Animator>().SetTrigger("pop");
+                    temporb.curState = Orb.OrbState.Poping;
+                    CurrentlyPoping = true;
+                }
+            } 
+        }
+    }
+
+    private void endPopingOrbs()
+    {
+        foreach (LinkedList<GameObject> Col in Cols) 
+        {
+            foreach (GameObject orb in Col.ToList()) 
+            {
+                Orb temporb = orb.GetComponent<Orb>();
+                if (temporb.curState == Orb.OrbState.Poping)
+                {
+                    
+                    Vector3 temp = temporb.GetComponent<Orb>().GetRelPos();
+                    Cols[(int)temp.x].Remove(temporb.gameObject);
+                    Destroy(temporb.gameObject);
+                }
+            } 
+        }
     }
 
 
-
+    private void evaluate()
+    {
+        
+    }
 
 
     /// <summary>
@@ -232,6 +303,7 @@ public class BoardManager : MonoBehaviour
         {
             orb.transform.position = new Vector3(orb.transform.position.x, ancor.y - 1, ORB_VIEW_LAYER);
             Debug.Log("orb : " + orb.name + " is being added to fallenOrbs");
+            orb.GetComponent<Orb>().curState = Orb.OrbState.Falling;
             fallenOrbs.AddLast(orb);
             orb.GetComponentInChildren<Animator>().SetTrigger("spin");
         }
@@ -261,13 +333,14 @@ public class BoardManager : MonoBehaviour
                     while (localFallen.Count > 0)
                     {
                         toPopOrbs.Enqueue(localFallen.Dequeue());
+                        temp.GetComponentInChildren<Animator>().SetTrigger("rest");
                     }
                 }
                 else
                 {
                     while (localFallen.Count > 0)
                     {
-                        localFallen.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
+                        localFallen.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
                         temp.GetComponentInChildren<Animator>().SetTrigger("rest");
 
                     }
@@ -280,13 +353,12 @@ public class BoardManager : MonoBehaviour
             }
 
         }
-        popOrbs();
+        if (!CurrentlyPoping)
+        {
+            evaluateOrbs();
+            CurrentlyPoping = true;
+        }
     }
-
-
-
-
-
 
 
     /// <summary>
@@ -297,8 +369,6 @@ public class BoardManager : MonoBehaviour
         int pattern = (int)Mathf.Floor(UnityEngine.Random.Range(0, PatternList.Length));
         dropQue.Enqueue(PatternList[pattern]);
     }
-
-
 
 
 
@@ -416,54 +486,24 @@ public class BoardManager : MonoBehaviour
 
 
             Transform moveingOrb = GrabbedOrbs.GetChild(0);
-
+            GrabbedOrbs.GetChild(0).GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
             moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
             moveingOrb.SetParent(orbs.transform);
 
             Cols[Line].AddLast(moveingOrb.gameObject);
-
             HeldObrs--;
-
-            if (HeldObrs == 0)
-            {
-                EvaluateOrb(toPopOrbs, moveingOrb.GetComponent<Orb>(), moveingOrb.GetComponent<Orb>().orbScript.orbType);
-                if (popCondition(toPopOrbs))
-                {
-                    popOrbs();
-                }
-                else
-                {
-                    while (toPopOrbs.Count > 0)
-                    {
-                        toPopOrbs.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Resting;
-                    }
-                }
-            }
+            Orb temp = moveingOrb.GetComponent<Orb>();
+            temp.curState = Orb.OrbState.Falling;
+            EvaluateOrbWoQue(temp,temp.GetOrbType(),Orb.OrbState.Evaluating);
+        }
+        if (!CurrentlyPoping)
+        {
+            evaluateOrbs();
+            CurrentlyPoping = true;
         }
 
         heldType = OrbType.ERROR;
         CheckPickerType();        
-    }
-
-
-    
-
-
-
-
-    /// <summary>
-    /// destroys all orbs in toPopOrbs and calls checkforfalling
-    /// </summary>
-    public void popOrbs()
-    {
-        while (toPopOrbs.Count > 0)
-        {
-            toPopOrbs.Peek().SetActive(false);
-            Vector2 temp = toPopOrbs.Peek().GetComponent<Orb>().GetRelPos();
-            Cols[(int)temp.x].Remove(Cols[(int)temp.x].Find(toPopOrbs.Peek()));
-            Destroy(toPopOrbs.Dequeue());
-        }
-        checkForFalling();
     }
 
 
@@ -507,10 +547,11 @@ public class BoardManager : MonoBehaviour
                 CheckPickerType();
                 AttemptGrabOrb(Line);
             }
-
             else
             {
-                if (Cols[Line].Last.Value.GetComponent<Orb>().checkOrbType(heldType))
+                if (Cols[Line].Last.Value.GetComponent<Orb>().checkOrbType(heldType) 
+                && ( Cols[Line].Last.Value.GetComponent<Orb>().curState == Orb.OrbState.Resting
+                || Cols[Line].Last.Value.GetComponent<Orb>().curState == Orb.OrbState.Evaluating ) )
                 {
                     StoreOrb(Cols[Line].Last.Value);
                     Cols[Line].RemoveLast();
@@ -613,12 +654,12 @@ public class BoardManager : MonoBehaviour
     public bool EvaluateOrb(Queue<GameObject> ReadyToPop, Orb curOrb, OrbType color )
     {
         Debug.Log("orb " + curOrb.gameObject.name + " is attempting a pop check");
-        if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Poping)
+        if (color == curOrb.orbScript.orbType && curOrb.curState != Orb.OrbState.Evaluating)
         {
             Debug.Log("orb " + curOrb.gameObject.name + "has passed the pop check ");
 
             ReadyToPop.Enqueue(curOrb.gameObject);
-            curOrb.curState = Orb.OrbState.Poping;
+            curOrb.curState = Orb.OrbState.Evaluating;
 
 
             Vector2 temp = curOrb.GetRelPos();
@@ -669,7 +710,60 @@ public class BoardManager : MonoBehaviour
 
 
 
-    
+    public bool EvaluateOrbWoQue( Orb curOrb, OrbType color, Orb.OrbState CheckMakeType)
+    {
+        Debug.Log("orb " + curOrb.gameObject.name + " is attempting a pop check");
+        if (color == curOrb.orbScript.orbType && curOrb.curState != CheckMakeType)
+        {
+            Debug.Log("orb " + curOrb.gameObject.name + "has passed the pop check ");
+
+            curOrb.curState = CheckMakeType;
+
+
+            Vector2 temp = curOrb.GetRelPos();
+
+
+            LinkedListNode<GameObject> node = Cols[(int)temp.x].First;
+
+
+            for (int i = 0; i < (int)temp.y; i++)
+            {
+                node = node.Next;
+
+            }
+            if ((int)temp.y < (Cols[(int)temp.x].Count - 1))
+            {
+                Debug.Log("orb " + curOrb.gameObject.name + " is pop checking down");
+                EvaluateOrbWoQue(node.Next.Value.GetComponent<Orb>(), color,CheckMakeType);
+            }
+            if ((int)temp.y > 0)
+            {
+                Debug.Log("orb " + curOrb.gameObject.name + " is pop checking up");
+                EvaluateOrbWoQue(node.Previous.Value.GetComponent<Orb>(), color,CheckMakeType);
+            }
+            if ((int)temp.x <  6 && Cols[(int)temp.x + 1].Count > (int)temp.y)
+            {
+                Debug.Log("orb " + curOrb.gameObject.name + " is pop checking right");
+                node = Cols[(int)temp.x + 1].First;
+                for (int i = 0; i < (int)temp.y; i++)
+                {
+                    node = node.Next;
+                }
+                EvaluateOrbWoQue(node.Value.GetComponent<Orb>(), color,CheckMakeType);
+            }
+            if ((int)temp.x >= 1 && Cols[(int)temp.x - 1].Count > (int)temp.y)
+            {
+                Debug.Log("orb " + curOrb.gameObject.name + " is pop checking left");
+                node = Cols[(int)temp.x - 1].First;
+                for (int i = 0; i < (int)temp.y; i++)
+                {
+                    node = node.Next;
+                }
+                EvaluateOrbWoQue(node.Value.GetComponent<Orb>(), color,CheckMakeType);
+            }
+        }
+        return false;
+    }
     
     
     

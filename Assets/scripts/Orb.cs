@@ -5,7 +5,7 @@ using UnityEngine;
 public class Orb : MonoBehaviour
 {
     public OrbScriptable orbScript;
-    public enum OrbState {Resting, Falling, Poping, Evaluating}
+    public enum OrbState {Grabbed, Resting, Falling, Poping, Evaluating, ToEvaluate, ToPop}
     public OrbState curState = OrbState.Resting;
 
 
