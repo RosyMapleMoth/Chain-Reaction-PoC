@@ -94,6 +94,16 @@ public class Selector : MonoBehaviour
             gameMng.DropOrbs(CurCol);
         }
 
+        if (gameMng.Cols[GetCurCol()].Count > 0)
+        {
+            selectLine.SetPosition(0, new Vector3(selectLine.GetPosition(0).x, gameMng.Cols[GetCurCol()].Last.Value.transform.position.y - 0.9f, selectLine.GetPosition(0).z));
+        }
+        else
+        {
+            selectLine.SetPosition(0, new Vector3(selectLine.GetPosition(0).x, 6, selectLine.GetPosition(0).z));
+        }
+
+
 
         if (moving)
         {

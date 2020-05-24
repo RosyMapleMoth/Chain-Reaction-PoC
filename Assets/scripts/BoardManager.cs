@@ -476,7 +476,7 @@ public class BoardManager : MonoBehaviour
     public void DropOrbs(int Line)
     {
         GameObject tempDad = Instantiate(new GameObject(),new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0), Quaternion.identity);
-        Queue<Transform> orbQues = new Queue<Transform>();
+        Stack<Transform> orbQues = new Stack<Transform>();
 
 
         GameObject Gotoposition;
@@ -495,15 +495,15 @@ public class BoardManager : MonoBehaviour
         {
             if (orbQues.Count > 0)
             {
-                GrabbedOrbs.GetChild(0).transform.position = orbQues.Peek().position + new Vector3(0,-1,0);
+                GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).transform.position = orbQues.Peek().position + new Vector3(0,-1,0);
             }
             else
             {
-                GrabbedOrbs.GetChild(0).transform.position = new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0);
+                GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).transform.position = new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0);
             }
-            Cols[Line].AddLast(GrabbedOrbs.GetChild(0).gameObject);
-            orbQues.Enqueue(GrabbedOrbs.GetChild(0));
-            GrabbedOrbs.GetChild(0).SetParent(null);
+            Cols[Line].AddLast(GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).gameObject);
+            orbQues.Push(GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1));
+            GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).SetParent(null);
         }
 
         // 
@@ -534,9 +534,8 @@ public class BoardManager : MonoBehaviour
             {
                 tempDad.transform.GetChild(0).GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
                 tempDad.transform.GetChild(0).SetParent(orbs.transform);
-                Destroy(tempDad);
-
             }
+            Destroy(tempDad);
             if (!CurrentlyPoping)
             {
                 evaluateOrbs();
@@ -584,7 +583,9 @@ public class BoardManager : MonoBehaviour
     /// <param name="Line"></param>
     public void AttemptGrabOrb(int Line)
     {
-        if (Cols[Line].Count > 0 )
+        if (Cols[Line].Count > 0 
+        && ( Cols[Line].Last.Value.GetComponent<Orb>().curState == Orb.OrbState.Resting
+        || Cols[Line].Last.Value.GetComponent<Orb>().curState == Orb.OrbState.Evaluating ) )
         {
             if (HeldObrs == 0)
             {
@@ -608,7 +609,7 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
-    
+
 
 
 
