@@ -12,9 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a51b3481821c944aafbebbe6afca7a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectLine: {fileID: 0}
   Cursor: {fileID: 4953052222439651989}
   gameMng: {fileID: 9198624162305727528}
   selectorLine: {fileID: 9198624161223491762}
+  elapsedTime: 0
+  moving: 0
+  MoveTarget: {x: 0, y: 0, z: 0}
+  Ancor: {x: 0, y: 0, z: 0}
+  MoveStart: {x: 0, y: 0, z: 0}
 --- !u!1 &9198624160629733667
 GameObject:
   m_ObjectHideFlags: 0
@@ -60,6 +66,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -71,6 +78,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -169,6 +177,7 @@ LineRenderer:
   m_MotionVectors: 0
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -180,6 +189,7 @@ LineRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -295,6 +305,7 @@ SpriteMask:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -306,6 +317,7 @@ SpriteMask:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -405,6 +417,7 @@ SpriteMask:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -416,6 +429,7 @@ SpriteMask:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -513,6 +527,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -524,6 +539,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -592,6 +608,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 006077d13a5ebbb428de796438c264d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ancors: {fileID: 0}
   StartPatt:
   - {fileID: 11400000, guid: 02b17e9fb7017ca4b8034fdc73ff7e28, type: 2}
   orbPrefab: {fileID: 9078092447020789734, guid: 3526c24fe37d793479ceee665d61f179,
@@ -610,8 +627,15 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 97745a0310c935d4e8e76ec62dbcd761, type: 3}
   - {fileID: 21300000, guid: c8ec0111f4162254eb1f58e2169e617d, type: 3}
   - {fileID: 21300000, guid: a07614d0508d5254fa50d3e57eb70ac1, type: 3}
+  fallenPopConter: -0.25
+  PatternList: []
   countdown: {fileID: 0}
   GrabbedOrbs: {fileID: 9198624162020435153}
+  orbIDNext: 0
+  popOrbsTimer: 1
+  CurrentlyPoping: 0
+  ChainTimer: 0
+  PopTimer: 1
 --- !u!1 &9198624162406734070
 GameObject:
   m_ObjectHideFlags: 0
@@ -662,6 +686,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -673,6 +698,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -703,11 +729,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 9198624160916741075}
     m_Modifications:
-    - target: {fileID: 7537550727974890543, guid: c89835e30c3b3df488f27d2c2e19b3a9,
-        type: 3}
-      propertyPath: m_Name
-      value: picker
-      objectReference: {fileID: 0}
     - target: {fileID: 1880070953101159199, guid: c89835e30c3b3df488f27d2c2e19b3a9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -769,6 +790,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 49bcd5e6e863072429f21bd090e278a6,
         type: 3}
+    - target: {fileID: 7537550727974890543, guid: c89835e30c3b3df488f27d2c2e19b3a9,
+        type: 3}
+      propertyPath: m_Name
+      value: picker
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c89835e30c3b3df488f27d2c2e19b3a9, type: 3}
 --- !u!1 &4953052222439651989 stripped
