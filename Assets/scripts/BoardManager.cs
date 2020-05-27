@@ -91,7 +91,6 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     void Update()
     {
-
         // Generate reserve Orbs
         if (reserveLines < incomingLines)
         {
@@ -106,7 +105,7 @@ public class BoardManager : MonoBehaviour
         timeUntilDrop -= Time.deltaTime;
         if (timeUntilDrop <= 0)
         {
-            Debug.Log("Lines Moving down");
+            Debug.unityLogger.Log("Genreal", "Lines Moving down");
             DropLine(1);
             timeUntilDrop = 5f;
         }
@@ -127,6 +126,7 @@ public class BoardManager : MonoBehaviour
         {
             if (!CurrentlyPoping)
             {
+                Debug.Log("evaluating orbs from drop");
                 evaluateOrbs();
             }
             fallenPopConter = -2;
@@ -151,6 +151,7 @@ public class BoardManager : MonoBehaviour
 
     private void evaluateOrbs()
     {
+        Debug.unityLogger.Log("Orb Eval", "Starting");
         foreach (LinkedList<GameObject> Col in Cols) 
         {
             foreach (GameObject orb in Col) 
@@ -160,21 +161,24 @@ public class BoardManager : MonoBehaviour
                 {
                     if (VertThree(temp,temp.GetOrbType()))
                     {
+                        Debug.unityLogger.Log("Orb Eval", temp.name + " is being set ToPop");
                         EvaluateOrbWoQue(temp,temp.GetOrbType(),Orb.OrbState.ToPop);
                     } 
                     else
                     {
+                        Debug.unityLogger.Log("Orb Eval", temp.name + " is being set Resting");
                         temp.curState = Orb.OrbState.Resting;
                     }
                 }
             } 
         }
-        Debug.Log("check done");
+        Debug.unityLogger.Log("Orb Eval", "Ending");
         startPopingOrbs();
     }
 
     private void startPopingOrbs()
     {
+        Debug.unityLogger.Log("Start Orb Pop", "Starting");
         // check all movied 
         foreach (LinkedList<GameObject> Col in Cols) 
         {
@@ -183,36 +187,37 @@ public class BoardManager : MonoBehaviour
                 Orb temporb = orb.GetComponent<Orb>();
                 if (temporb.curState == Orb.OrbState.ToPop)
                 {
+                    Debug.unityLogger.Log("Start Orb Pop", temporb + " has begun To Pop");
                     orb.GetComponentInChildren<Animator>().SetTrigger("pop");
                     temporb.curState = Orb.OrbState.Poping;
                     CurrentlyPoping = true;
                 }
             } 
         }
+        Debug.unityLogger.Log("Start Orb Pop", "Ending");
     }
 
     private void endPopingOrbs()
     {
+        Debug.unityLogger.Log("End Orb Pop", "Starting");
         foreach (LinkedList<GameObject> Col in Cols) 
         {
             foreach (GameObject orb in Col.ToList()) 
             {
                 Orb temporb = orb.GetComponent<Orb>();
+                Debug.unityLogger.Log("End Orb Pop", "Orb " + temporb.name + " is being checked");
                 if (temporb.curState == Orb.OrbState.Poping)
                 {
                     
                     Vector3 temp = temporb.GetComponent<Orb>().GetRelPos();
                     Cols[(int)temp.x].Remove(temporb.gameObject);
                     Destroy(temporb.gameObject);
+                    Debug.unityLogger.Log("End Orb Pop", "Orb " + temporb.name + " has been Popped");
+
                 }
             } 
         }
-    }
-
-
-    private void evaluate()
-    {
-        
+        Debug.unityLogger.Log("End Orb Pop", "Ending");
     }
 
 
@@ -228,13 +233,14 @@ public class BoardManager : MonoBehaviour
         GameObject lastNode = curNode;
 
         int VertCount = 0;
-        
+
         // how many orbs are vertically in a row down from starting orb
-        while (curNode != null && curNode.GetComponent<Orb>().GetOrbType() == color)
+        while (curNode != null && curNode.GetComponent<Orb>().GetOrbType() == color && curNode.GetComponent<Orb>().curState != Orb.OrbState.Falling)
         {
             lastNode = curNode;
             VertCount++;
             Vector2 temp = curNode.GetComponent<Orb>().GetRelPos();
+            Debug.Log("checking for cur node at location " + temp);
             curNode = GetOrbAtRelPos((int)temp.x, (int)temp.y + 1);
         }
 
@@ -247,12 +253,15 @@ public class BoardManager : MonoBehaviour
         {
             VertCount = 0;
             curNode = lastNode;
-            while (curNode != null && curNode.GetComponent<Orb>().GetOrbType() == color )
+            while (curNode != null && curNode.GetComponent<Orb>().GetOrbType() == color && curNode.GetComponent<Orb>().curState != Orb.OrbState.Falling)
             {
                 lastNode = curNode;
                 VertCount++;
                 Vector2 temp = curNode.GetComponent<Orb>().GetRelPos();
+                Debug.Log("checking for cur node at location " + temp);
+
                 curNode = GetOrbAtRelPos((int)temp.x, (int)temp.y - 1);
+                Debug.Log("node is " + curNode);
             }
         }
         return (VertCount >= 3);
@@ -309,22 +318,27 @@ public class BoardManager : MonoBehaviour
         if (Mathf.Ceil(orb.transform.position.y) != Mathf.Ceil(ancor.transform.position.y) - 1 || ancor.GetComponent<Orb>().curState == Orb.OrbState.Falling)
         {
             orb.GetComponent<Orb>().curState = Orb.OrbState.Falling;
-       
+            
+            Vector3 start = orb.transform.position;
+            orb.transform.position = ancor.transform.position + new Vector3 (0, -1 ,0 );
+
             IEnumerator Fall()
             {
                 float elapsedTime = 0;
                 float waitTime = 0.1f;
-                Vector3 currentPos = orb.transform.position;
+                orb.transform.GetChild(0).position = new Vector3(start.x + 0.4f,start.y- 0.4f,start.z);;
+                Vector3 currentPos = orb.transform.GetChild(0).position;
+                
 
                 while (elapsedTime < waitTime)
                 {
-
+                    Debug.unityLogger.Log("Fall(checkNode)" + orb.name, "remaining time " + (waitTime - elapsedTime));
 
                     try
                     {
-                        orb.transform.position = Vector3.Lerp(currentPos,
+                        orb.transform.GetChild(0).position = Vector3.Lerp(currentPos,
                                                               new Vector3(currentPos.x,
-                                                                           -depth + OobCols[Line].Last.Value.transform.position.y - 1,
+                                                                           orb.transform.position.y,
                                                                            currentPos.z),
                                                              Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                     }
@@ -338,76 +352,29 @@ public class BoardManager : MonoBehaviour
                 // Make sure we got there
                 try
                 {
-                    orb.transform.position = Vector3.Lerp(currentPos,
+                    orb.transform.GetChild(0).position = Vector3.Lerp(currentPos,
                                                               new Vector3(currentPos.x,
-                                                                           -depth + OobCols[Line].Last.Value.transform.position.y - 1,
+                                                                           orb.transform.position.y,
                                                                            currentPos.z),
-                                                             Mathf.Clamp((elapsedTime / waitTime), 0, 1));
+                                                             1);
                 }
-                catch
+                catch (Exception e)
                 {
-                    // TODO add wait timer for a small amount of time before reechecking
+                    Debug.LogException(e);
+                    
+                    
                 }
 
                 orb.GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
-                Debug.Log(" Fall Coroutine is done");
+                Debug.unityLogger.Log("Fall(checkNode)" + orb.name, "ending fall for " + orb.name);
                 yield return null;
             }
 
+            Debug.unityLogger.Log("Fall(checkNode)" + orb.name, "Starting for orb " + orb.name);
             StartCoroutine(Fall());
             fallenPopConter = 0.14f;
         }
 
-    }
-
-
-
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public void fallfinish()
-    {
-        while (fallenOrbs.Count > 0)
-        {
-            try
-            {
-                Queue<GameObject> localFallen = new Queue<GameObject>(); 
-                GameObject temp = fallenOrbs.First.Value;
-                fallenOrbs.RemoveFirst();
-                EvaluateOrb(localFallen, temp.GetComponent<Orb>(), temp.GetComponent<Orb>().GetOrbType());
-                if (popCondition(localFallen))
-                {
-                    while (localFallen.Count > 0)
-                    {
-                        toPopOrbs.Enqueue(localFallen.Dequeue());
-                        temp.GetComponentInChildren<Animator>().SetTrigger("rest");
-                    }
-                }
-                else
-                {
-                    while (localFallen.Count > 0)
-                    {
-                        localFallen.Dequeue().GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
-                        temp.GetComponentInChildren<Animator>().SetTrigger("rest");
-
-                    }
-                }
-            }
-            catch
-            {
-                fallenOrbs.RemoveFirst();
-                Debug.Log("ERROR null orb in fallen orbs");
-            }
-
-        }
-        if (!CurrentlyPoping)
-        {
-            evaluateOrbs();
-            CurrentlyPoping = true;
-        }
     }
 
 
@@ -520,7 +487,7 @@ public class BoardManager : MonoBehaviour
     /// Drops held orbs on to the board
     /// </summary>
     /// <param name="Line"></param>
-    public void DropOrbs(int Line)
+    public void DropOrbsXXX(int Line)
     {
         GameObject tempDad = Instantiate(new GameObject(),new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0), Quaternion.identity);
         Stack<Transform> orbQues = new Stack<Transform>();
@@ -620,6 +587,99 @@ public class BoardManager : MonoBehaviour
         CheckPickerType();        
     }
 
+
+
+
+/// <summary>
+    /// Drops held orbs on to the board
+    /// </summary>
+    /// <param name="Line"></param>
+    public void DropOrbs(int Line)
+        {
+        while (GrabbedOrbs.childCount > 0)
+        {
+            GameObject ancorOrb;
+            if (Cols[Line].Count > 0)
+            {
+                 ancorOrb = Cols[Line].Last.Value;
+            }
+            else
+            {
+                ancorOrb = OobCols[Line].Last.Value;
+            }
+
+
+            Transform moveingOrb = GrabbedOrbs.GetChild(0);
+
+            Vector3 start = moveingOrb.position;
+            moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
+            moveingOrb.GetChild(0).position = start;
+            moveingOrb.GetComponent<Orb>().curState = Orb.OrbState.Falling;
+            moveingOrb.SetParent(orbs.transform);
+            Cols[Line].AddLast(moveingOrb.gameObject);
+
+            HeldObrs--;
+
+
+            IEnumerator MoveToSpot()
+            {
+                
+                float elapsedTime = 0;
+                float waitTime = 0.25f - 0.01f*Cols[Line].Count;
+                Transform moving = moveingOrb.GetChild(0);
+                moving.position = new Vector3(moveingOrb.transform.position.x + 0.4f,-5 - 0.4f,0);
+                Vector3 currentPos = moving.position;
+                
+                while (elapsedTime < waitTime)
+                {
+
+
+                    try
+                    {
+                        moving.position = Vector3.Lerp(currentPos,
+                                                            new Vector3(moveingOrb.transform.position.x + 0.4f,
+                                                                        moveingOrb.position.y - 0.4f,
+                                                                        moveingOrb.transform.position.z),
+                                                            Mathf.Clamp((elapsedTime / waitTime), 0, 1));
+                    }
+                    catch
+                    {
+
+                    }
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+                // Make sure we got there
+                try
+                {
+                    moving.position = Vector3.Lerp(currentPos,
+                                                            new Vector3(moveingOrb.transform.position.x + 0.4f,
+                                                                        moveingOrb.position.y - 0.4f,
+                                                                        moveingOrb.transform.position.z),
+                                                            1);
+                }
+                catch
+                {
+                    // TODO add wait timer for a small amount of time before reechecking
+                }
+
+                moveingOrb.GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
+                if (!CurrentlyPoping)
+                {
+                    evaluateOrbs();
+                }
+                Debug.Log("Coroutine is done");
+                yield return null;
+            }
+
+            StartCoroutine(MoveToSpot());
+        }
+        HeldObrs =0;
+        heldType = OrbType.ERROR;
+        CheckPickerType();       
+    }
+
+    
 
     
 
@@ -883,8 +943,9 @@ public class BoardManager : MonoBehaviour
             }
             return node.Value;
         }
-        catch
+        catch (Exception e)
         {
+            Debug.LogException(e);
             return null;
         }
     }

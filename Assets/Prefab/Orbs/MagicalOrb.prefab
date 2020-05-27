@@ -223,6 +223,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   orbScript: {fileID: 0}
   curState: 0
+  TargetPos: {x: 0, y: 0, z: 0}
 --- !u!1 &9169049552108839516
 GameObject:
   m_ObjectHideFlags: 0
@@ -303,7 +304,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 1
+  m_MaskInteraction: 0
   m_SpriteSortPoint: 1
 --- !u!95 &6203250885290521470
 Animator:
