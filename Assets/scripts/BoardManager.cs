@@ -39,7 +39,7 @@ public class BoardManager : MonoBehaviour
     public float popOrbsTimer = POPTIMERMAX;
     public bool CurrentlyPoping;
     public float ChainTimer;
-
+    public float DropSpeed;
     public float PopTimer = POPTIMERMAX;
 
 
@@ -107,7 +107,7 @@ public class BoardManager : MonoBehaviour
         {
             Debug.unityLogger.Log("Genreal", "Lines Moving down");
             DropLine(1);
-            timeUntilDrop = 5f;
+            timeUntilDrop = DropSpeed;
         }
 
         // the countdown text 
@@ -338,7 +338,7 @@ public class BoardManager : MonoBehaviour
                     {
                         orb.transform.GetChild(0).position = Vector3.Lerp(currentPos,
                                                               new Vector3(currentPos.x,
-                                                                           orb.transform.position.y,
+                                                                           orb.transform.position.y - 0.4f,
                                                                            currentPos.z),
                                                              Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                     }
@@ -354,7 +354,7 @@ public class BoardManager : MonoBehaviour
                 {
                     orb.transform.GetChild(0).position = Vector3.Lerp(currentPos,
                                                               new Vector3(currentPos.x,
-                                                                           orb.transform.position.y,
+                                                                           orb.transform.position.y - 0.4f,
                                                                            currentPos.z),
                                                              1);
                 }
