@@ -223,6 +223,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   orbScript: {fileID: 0}
   curState: 0
+  TargetPos: {x: 0, y: 0, z: 0}
 --- !u!1 &9169049552108839516
 GameObject:
   m_ObjectHideFlags: 0
