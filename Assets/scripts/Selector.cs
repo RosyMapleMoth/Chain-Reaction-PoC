@@ -41,7 +41,22 @@ public class Selector : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // check input and in bounds
+        switch (gameMng.curstate)
+        {
+            case BoardManager.GameState.starting:
+                break;
+            case BoardManager.GameState.playing:
+                playingUpdate();
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    public void playingUpdate()
+    {
+       // check input and in bounds
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow) && CurCol > MIN_BOARD_SIZE)
         {
             // if we are already moving snap to target
@@ -129,10 +144,12 @@ public class Selector : MonoBehaviour
                 moving = false;
             }
         }
-
-
-
     }
+
+
+
+
+
 
 
   /*/// <summary>

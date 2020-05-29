@@ -9,21 +9,19 @@ public class BoardManager : MonoBehaviour
 {
     private const float POPTIMERMAX = 1;
     private const float FALLTIMEMAX = 0.25f;
-
-
     private float timeUntilDrop = 0f;
     private int incomingLines = 1;
     private int reserveLines = 0;
     public Pattern[] StartPatt;
     public GameObject orbPrefab;
     public GameObject orbs;
+    public GameObject DebugUI;
     static private int SPAWN_Y_Val = 7;
     static private int SPAWN_X_VAL = -4;
-    public LineRenderer selectLine;
     public GameObject switcher;
+    public GameObject GameOver;
     public int HeldObrs = 0;
     public OrbType heldType = OrbType.ERROR;
-    public SpriteRenderer HeldOrbRep;
     public LinkedList<GameObject>[] Cols;
     public LinkedList<GameObject>[] OobCols;
     public Sprite[] pickers;
@@ -32,15 +30,19 @@ public class BoardManager : MonoBehaviour
     private LinkedList<GameObject> fallenOrbs;
     public Pattern[] PatternList;
     public Text countdown;
+    public Text StartCountDown;
     public Transform GrabbedOrbs;
     public int orbIDNext;
     public static int ORB_VIEW_LAYER = -3;
     private Queue<Pattern> dropQue;
-    public float popOrbsTimer = POPTIMERMAX;
     public bool CurrentlyPoping;
     public float ChainTimer;
     public float DropSpeed;
     public float PopTimer = POPTIMERMAX;
+    public bool DebugMode;
+    public GameState curstate;
+    public enum GameState {starting,puase,playing,over};
+    public float StartingUp;
 
 
 
@@ -81,7 +83,7 @@ public class BoardManager : MonoBehaviour
         fallenOrbs = new LinkedList<GameObject>();
         toPopOrbs = new Queue<GameObject>();
         CurrentlyPoping = false;
-
+        StartingUp = 3f;
     }
 
 
@@ -90,6 +92,47 @@ public class BoardManager : MonoBehaviour
     /// 
     /// </summary>
     void Update()
+    {
+        switch (curstate)
+        {
+            case GameState.starting:
+                startingUpdate();
+                break;
+            case GameState.playing:
+                playingUpdate();
+                break;
+            case GameState.puase:
+                break;
+            case GameState.over:
+                GameOver.SetActive(true);
+                break;
+        }
+    }
+
+
+    public void startingUpdate()
+    {
+        if (StartingUp > 0)
+        {
+            StartCountDown.text = Mathf.Ceil(StartingUp).ToString();
+        }
+        else if (StartingUp > -1)
+        {
+            StartCountDown.text = "GO !";
+        }
+        else
+        {
+            StartCountDown.gameObject.SetActive(false);
+            curstate = GameState.playing;
+        }
+        StartingUp -= Time.deltaTime;
+
+    }
+
+
+
+
+    public void playingUpdate()
     {
         // Generate reserve Orbs
         if (reserveLines < incomingLines)
@@ -110,11 +153,6 @@ public class BoardManager : MonoBehaviour
             timeUntilDrop = DropSpeed;
         }
 
-        // the countdown text 
-        countdown.text = timeUntilDrop.ToString("F2");
-
-        // player curser
-        //updateSelectLineVert();
 
         // How we handel falling orbs
         if (fallenPopConter > 0)
@@ -135,6 +173,7 @@ public class BoardManager : MonoBehaviour
 
         // if we are counting down to a pop'
         if(CurrentlyPoping)
+        {
             if (PopTimer > 0)
             {
                 PopTimer -= Time.deltaTime;        
@@ -147,7 +186,31 @@ public class BoardManager : MonoBehaviour
                 evaluateOrbs();
                 PopTimer = POPTIMERMAX;
             }
+        }
+        if (DebugMode)
+        {
+            DebugUI.SetActive(true);
+            // the countdown text 
+            countdown.text = timeUntilDrop.ToString("F2");
+        }
+        else if (DebugMode)
+        {
+            DebugUI.SetActive(false);
+        }
+
+        foreach (LinkedList<GameObject> i in Cols)
+        {
+            if (i.Count > 12)
+            {
+                curstate = GameState.over;
+            }
+        }
     }
+
+
+
+
+
 
     private void evaluateOrbs()
     {
@@ -479,113 +542,6 @@ public class BoardManager : MonoBehaviour
     }
 
 
-
-
-
-
-    /// <summary>
-    /// Drops held orbs on to the board
-    /// </summary>
-    /// <param name="Line"></param>
-    public void DropOrbsXXX(int Line)
-    {
-        GameObject tempDad = Instantiate(new GameObject(),new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0), Quaternion.identity);
-        Stack<Transform> orbQues = new Stack<Transform>();
-
-
-        GameObject Gotoposition;
-        if (Cols[Line].Count > 0)
-            {
-                Gotoposition = Cols[Line].Last.Value;
-            }
-            else
-            {
-                Gotoposition = OobCols[Line].Last.Value;
-            }
-
-
-        
-        while (GrabbedOrbs.childCount > 0)
-        {
-            if (orbQues.Count > 0)
-            {
-                GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).transform.position = orbQues.Peek().position + new Vector3(0,-1,0);
-            }
-            else
-            {
-                GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).transform.position = new Vector3((float)Line - 4f + 0.1f,-5 - 0.1f,0);
-            }
-            Cols[Line].AddLast(GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).gameObject);
-            orbQues.Push(GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1));
-            GrabbedOrbs.GetChild(GrabbedOrbs.childCount - 1).SetParent(null);
-        }
-
-        // 
-        foreach (Transform trans in orbQues)
-        {
-            trans.SetParent(tempDad.transform);
-            Orb tempOrb = trans.GetComponent<Orb>();
-            tempOrb.curState = Orb.OrbState.Falling;
-        }
-
-        // set up corutine for move aniamtion
-        IEnumerator MoveToSpot()
-        {
-            float elapsedTime = 0;
-            float waitTime = 0.25f - 0.01f*Cols[Line].Count;
-            Vector3 currentPos = tempDad.transform.position;
-    
-            while (elapsedTime < waitTime)
-            {
-
-
-                try
-                {
-                    tempDad.transform.position = Vector3.Lerp(currentPos,
-                                                          new Vector3(Gotoposition.transform.position.x,
-                                                                       -Cols[Line].Count + tempDad.transform.childCount + OobCols[Line].Last.Value.transform.position.y - 1,
-                                                                       Gotoposition.transform.position.z),
-                                                         Mathf.Clamp((elapsedTime / waitTime), 0, 1));
-                }
-                catch
-                {
-
-                }
-                elapsedTime += Time.deltaTime;
-                yield return null;
-            }
-            // Make sure we got there
-            try
-            {
-                tempDad.transform.position = new Vector3(Gotoposition.transform.position.x,
-                                                                      -Cols[Line].Count + tempDad.transform.childCount + OobCols[Line].Last.Value.transform.position.y - 1,
-                                                                      Gotoposition.transform.position.z);
-            }
-            catch
-            {
-                   // TODO add wait timer for a small amount of time before reechecking
-            }
-
-            while (tempDad.transform.childCount > 0)
-            {
-                tempDad.transform.GetChild(0).GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
-                tempDad.transform.GetChild(0).SetParent(orbs.transform);
-            }
-            Destroy(tempDad);
-            if (!CurrentlyPoping)
-            {
-                evaluateOrbs();
-            }
-            Debug.Log("Coroutine is done");
-            yield return null;
-        }
-
-        StartCoroutine(MoveToSpot());
-
-        HeldObrs =0;
-        heldType = OrbType.ERROR;
-        CheckPickerType();        
-    }
 
 
 
@@ -949,17 +905,4 @@ public class BoardManager : MonoBehaviour
             return null;
         }
     }
-
-    private Vector2 GetRealPosOfOrb(GameObject orb)
-    {
-        for (int x = 0; x<7; x++)
-        {
-            if (Cols[x].Contains(orb)) 
-            {       
-                Debug.Log("Test");
-            }
-        }
-        return Vector2.negativeInfinity;
-    }
-
 }
