@@ -9,6 +9,7 @@ public class BoardManager : MonoBehaviour
 {
     private const float POPTIMERMAX = 1;
     private const float FALLTIMEMAX = 0.25f;
+    private const int MAXORBS = 12;
     private float timeUntilDrop = 0f;
     private int incomingLines = 1;
     private int reserveLines = 0;
@@ -200,7 +201,7 @@ public class BoardManager : MonoBehaviour
 
         foreach (LinkedList<GameObject> i in Cols)
         {
-            if (i.Count > 12)
+            if (i.Count >= MAXORBS)
             {
                 curstate = GameState.over;
             }
