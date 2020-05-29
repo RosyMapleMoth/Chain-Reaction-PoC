@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
+
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,5 +26,15 @@ public class MainMenuController : MonoBehaviour
     {
         SceneManager.LoadScene("SinglePlayer");
     }
+
+    public void exit()
+    {
+        SceneManager.LoadScene("multiPlayer");
+    }
+
+    public void settings()
+    {
+        SceneManager.LoadScene("Settings");
+    }   
 
 }
