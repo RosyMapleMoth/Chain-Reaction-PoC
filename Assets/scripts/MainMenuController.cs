@@ -29,7 +29,7 @@ public class MainMenuController : MonoBehaviour
 
     public void exit()
     {
-        SceneManager.LoadScene("multiPlayer");
+        SceneManager.LoadScene("add players");
     }
 
     public void settings()

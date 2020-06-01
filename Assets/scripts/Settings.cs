@@ -1,9 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Settings : MonoBehaviour
 {
+
+
+    public List<PlayerInput> Players;
 
     public KeyCode PlayerOneLeft;
     public KeyCode PlayerOneRight;
@@ -151,6 +155,7 @@ public class Settings : MonoBehaviour
         if (Instance == null)
         {
             DontDestroyOnLoad(gameObject);
+            Players = new List<PlayerInput>();
             Instance = this;
         }
         else if (Instance != this)
