@@ -1326,16 +1326,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_UIInputModule
       value: 
-      objectReference: {fileID: 113081455}
+      objectReference: {fileID: 0}
     - target: {fileID: 3277112097243913974, guid: 3eb285b0d64d3574696cf72f9d603965,
         type: 3}
       propertyPath: m_Camera
       value: 
-      objectReference: {fileID: 1435237163}
+      objectReference: {fileID: 0}
     - target: {fileID: 3277112097243913974, guid: 3eb285b0d64d3574696cf72f9d603965,
         type: 3}
       propertyPath: m_DefaultControlScheme
-      value: New control scheme
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4953052222439651989, guid: 3eb285b0d64d3574696cf72f9d603965,
         type: 3}
