@@ -21,6 +21,12 @@ MonoBehaviour:
   MoveTarget: {x: 0, y: 0, z: 0}
   Ancor: {x: 0, y: 0, z: 0}
   MoveStart: {x: 0, y: 0, z: 0}
+  Playerleft: 0
+  Playerright: 0
+  Playerup: 0
+  Playerdown: 0
+  PlayerPick: 0
+  PlayerDrop: 0
 --- !u!1 &9198624160629733667
 GameObject:
   m_ObjectHideFlags: 0
@@ -608,17 +614,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 006077d13a5ebbb428de796438c264d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ancors: {fileID: 0}
   StartPatt:
   - {fileID: 11400000, guid: 02b17e9fb7017ca4b8034fdc73ff7e28, type: 2}
   orbPrefab: {fileID: 9078092447020789734, guid: 3526c24fe37d793479ceee665d61f179,
     type: 3}
   orbs: {fileID: 9198624161089675598}
-  selectLine: {fileID: 0}
+  DebugUI: {fileID: 0}
   switcher: {fileID: 4953052222439651989}
+  GameOver: {fileID: 0}
   HeldObrs: 0
   heldType: 9
-  HeldOrbRep: {fileID: 9198624160629733665}
   pickers:
   - {fileID: 21300000, guid: 49bcd5e6e863072429f21bd090e278a6, type: 3}
   - {fileID: 21300000, guid: a2f4186ef47a48f468dd7e6aa8a549d1, type: 3}
@@ -630,12 +635,16 @@ MonoBehaviour:
   fallenPopConter: -0.25
   PatternList: []
   countdown: {fileID: 0}
+  StartCountDown: {fileID: 0}
   GrabbedOrbs: {fileID: 9198624162020435153}
   orbIDNext: 0
-  popOrbsTimer: 1
   CurrentlyPoping: 0
   ChainTimer: 0
+  DropSpeed: 0
   PopTimer: 1
+  DebugMode: 0
+  curstate: 0
+  StartingUp: 0
 --- !u!1 &9198624162406734070
 GameObject:
   m_ObjectHideFlags: 0
@@ -729,6 +738,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 9198624160916741075}
     m_Modifications:
+    - target: {fileID: 98129920215779404, guid: c89835e30c3b3df488f27d2c2e19b3a9,
+        type: 3}
+      propertyPath: m_Actions
+      value: 
+      objectReference: {fileID: -944628639613478452, guid: 69f4fc0133e129944a4dd6e0c4fe5ed9,
+        type: 3}
+    - target: {fileID: 98129920215779404, guid: c89835e30c3b3df488f27d2c2e19b3a9,
+        type: 3}
+      propertyPath: m_DefaultActionMap
+      value: Selector
+      objectReference: {fileID: 0}
     - target: {fileID: 1880070953101159199, guid: c89835e30c3b3df488f27d2c2e19b3a9,
         type: 3}
       propertyPath: m_LocalPosition.x
