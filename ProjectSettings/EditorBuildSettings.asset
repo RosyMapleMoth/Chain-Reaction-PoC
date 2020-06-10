@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/multiPlayer.unity
     guid: 611ff8fce9785b847825ad409c107680
+  - enabled: 1
+    path: Assets/Scenes/add players.unity
+    guid: 3a95564cb81ff3d468bc26f2cf4be85a
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9b30141b26fc9004fad46ff044436543,
       type: 2}
