@@ -12,16 +12,7 @@ public class ControlMenuController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        P1L = Settings.Instance.getPlayerOneLeft();
-        P1R = Settings.Instance.getPlayerOneRight();
-        P1D = Settings.Instance.getPlayerOneDrop();
-        //P1P = Settings.Instance.getPlayerOnePick();
-        P1PU = Settings.Instance.getPlayerOnePick();
-        P2L = Settings.Instance.getPlayerTwoLeft();
-        P2R = Settings.Instance.getPlayerTwoRight();
-        P2U = Settings.Instance.getPlayerTwoDrop();
-        //P2P = Settings.Instance.getPlayerOneLeft();
-        P2PU = Settings.Instance.getPlayerTwoPick();
+ 
     }
 
     // Update is called once per frame

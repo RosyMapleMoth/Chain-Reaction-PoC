@@ -502,6 +502,75 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1006709891}
   m_CullTransparentMesh: 0
+--- !u!1001 &1059515517
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5206013536262236049, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_Name
+      value: settings
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 287.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 277.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5206013536262236051, guid: d9942953853663e408e8cf78ec343d81,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d9942953853663e408e8cf78ec343d81, type: 3}
 --- !u!1 &1063811436
 GameObject:
   m_ObjectHideFlags: 0
@@ -1346,7 +1415,7 @@ MonoBehaviour:
   m_NotificationBehavior: 0
   m_MaxPlayerCount: 4
   m_AllowJoining: 1
-  m_JoinBehavior: 0
+  m_JoinBehavior: 1
   m_PlayerJoinedEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1356,14 +1425,31 @@ MonoBehaviour:
   m_JoinAction:
     m_UseReference: 0
     m_Action:
-      m_Name: 
+      m_Name: Join
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 
+      m_Id: d6cd9223-0a9d-416d-8080-08c9fc1ac360
       m_Processors: 
       m_Interactions: 
-      m_SingletonActionBindings: []
-    m_Reference: {fileID: 0}
+      m_SingletonActionBindings:
+      - m_Name: 
+        m_Id: 0faba4ac-5037-4f9a-abc8-bcf9c065454c
+        m_Path: <Keyboard>/z
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: Join
+        m_Flags: 0
+      - m_Name: 
+        m_Id: 9e351de5-0dd7-4c3b-a405-47254ddde8bd
+        m_Path: <Gamepad>/buttonSouth
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: Join
+        m_Flags: 0
+    m_Reference: {fileID: 8738615397989826535, guid: 69f4fc0133e129944a4dd6e0c4fe5ed9,
+      type: 3}
   m_PlayerPrefab: {fileID: 4059272815551234014, guid: d446fb1aefddd134da4c1e8be6691895,
     type: 3}
   m_SplitScreen: 0
@@ -1401,10 +1487,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b37b14815bc7d8144a75dcb8079bb516, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Pannals:
+  UnCheckedOutPannals:
   - {fileID: 1286008008}
   - {fileID: 330206564}
   - {fileID: 320095114}
   - {fileID: 1006709891}
   Players: []
-  Ready: 
