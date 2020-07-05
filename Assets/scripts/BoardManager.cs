@@ -45,6 +45,10 @@ public class BoardManager : MonoBehaviour
     public enum GameState {starting,puase,playing,over};
     public float StartingUp;
 
+    // This keeps track of orbs currently being grabbed,
+    // we should not be able to shoot orbs until Orbs Beinggrabed is zero
+    public int OrbsBeingGrabed;
+
 
 
     
@@ -85,6 +89,7 @@ public class BoardManager : MonoBehaviour
         toPopOrbs = new Queue<GameObject>();
         CurrentlyPoping = false;
         StartingUp = 3f;
+        OrbsBeingGrabed = 0;
     }
 
 
@@ -553,97 +558,97 @@ public class BoardManager : MonoBehaviour
     /// </summary>
     /// <param name="Line"></param>
     public void DropOrbs(int Line)
+    {
+        bool LastOne = true;
+        int initchildcount = GrabbedOrbs.childCount;
+        while (GrabbedOrbs.childCount > 0)
         {
-            bool LastOne = true;
-            int initchildcount = GrabbedOrbs.childCount;
-            while (GrabbedOrbs.childCount > 0)
+            GameObject ancorOrb;
+            if (Cols[Line].Count > 0)
             {
-                GameObject ancorOrb;
-                if (Cols[Line].Count > 0)
+                ancorOrb = Cols[Line].Last.Value;
+            }
+            else
+            {
+                ancorOrb = OobCols[Line].Last.Value;
+            }
+
+
+            Transform moveingOrb = GrabbedOrbs.GetChild(GrabbedOrbs.childCount-1);
+
+            Vector3 start = moveingOrb.position;
+            moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
+            moveingOrb.GetChild(0).position = start;
+            moveingOrb.GetComponent<Orb>().curState = Orb.OrbState.Falling;
+            moveingOrb.SetParent(orbs.transform);
+            Cols[Line].AddLast(moveingOrb.gameObject);
+
+            HeldObrs--;
+
+            if (GrabbedOrbs.childCount == initchildcount)
+            {
+                LastOne = true;
+            }
+            IEnumerator MoveToSpot()
+            {
+                
+                float elapsedTime = 0;
+                float waitTime = 0.25f - 0.01f*Cols[Line].Count;
+                Transform moving = moveingOrb.GetChild(0);
+                moving.position = new Vector3(moveingOrb.transform.position.x + 0.4f,-5 - 0.4f,0);
+                Vector3 currentPos = moving.position;
+                
+                while (elapsedTime < waitTime)
                 {
-                    ancorOrb = Cols[Line].Last.Value;
-                }
-                else
-                {
-                    ancorOrb = OobCols[Line].Last.Value;
-                }
 
 
-                Transform moveingOrb = GrabbedOrbs.GetChild(GrabbedOrbs.childCount-1);
-
-                Vector3 start = moveingOrb.position;
-                moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
-                moveingOrb.GetChild(0).position = start;
-                moveingOrb.GetComponent<Orb>().curState = Orb.OrbState.Falling;
-                moveingOrb.SetParent(orbs.transform);
-                Cols[Line].AddLast(moveingOrb.gameObject);
-
-                HeldObrs--;
-
-                if (GrabbedOrbs.childCount == initchildcount)
-                {
-                    LastOne = true;
-                }
-                IEnumerator MoveToSpot()
-                {
-                    
-                    float elapsedTime = 0;
-                    float waitTime = 0.25f - 0.01f*Cols[Line].Count;
-                    Transform moving = moveingOrb.GetChild(0);
-                    moving.position = new Vector3(moveingOrb.transform.position.x + 0.4f,-5 - 0.4f,0);
-                    Vector3 currentPos = moving.position;
-                    
-                    while (elapsedTime < waitTime)
-                    {
-
-
-                        try
-                        {
-                            moving.position = Vector3.Lerp(currentPos,
-                                                                new Vector3(moveingOrb.transform.position.x + 0.4f,
-                                                                            moveingOrb.position.y - 0.4f,
-                                                                            moveingOrb.transform.position.z),
-                                                                Mathf.Clamp((elapsedTime / waitTime), 0, 1));
-                        }
-                        catch
-                        {
-
-                        }
-                        elapsedTime += Time.deltaTime;
-                        yield return null;
-                    }
-                    // Make sure we got there
                     try
                     {
                         moving.position = Vector3.Lerp(currentPos,
-                                                                new Vector3(moveingOrb.transform.position.x + 0.4f,
-                                                                            moveingOrb.position.y - 0.4f,
-                                                                            moveingOrb.transform.position.z),
-                                                                1);
+                                                            new Vector3(moveingOrb.transform.position.x + 0.4f,
+                                                                        moveingOrb.position.y - 0.4f,
+                                                                        moveingOrb.transform.position.z),
+                                                            Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                     }
                     catch
                     {
-                        // TODO add wait timer for a small amount of time before reechecking
-                    }
 
-                    moveingOrb.GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
-                    if (!CurrentlyPoping)
-                    {
-                        
                     }
-                    Debug.Log("Coroutine is done");
+                    elapsedTime += Time.deltaTime;
                     yield return null;
                 }
+                // Make sure we got there
+                try
+                {
+                    moving.position = Vector3.Lerp(currentPos,
+                                                            new Vector3(moveingOrb.transform.position.x + 0.4f,
+                                                                        moveingOrb.position.y - 0.4f,
+                                                                        moveingOrb.transform.position.z),
+                                                            1);
+                }
+                catch
+                {
+                    // TODO add wait timer for a small amount of time before reechecking
+                }
 
-                StartCoroutine(MoveToSpot());
+                moveingOrb.GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
+                if (!CurrentlyPoping)
+                {
+                    
+                }
+                Debug.Log("Coroutine is done");
+                yield return null;
             }
-            if (fallenPopConter <= 0)
-            {
-                fallenPopConter = 0.26f;
-            }
-            HeldObrs =0;
-            heldType = OrbType.ERROR;
-            CheckPickerType();       
+
+            StartCoroutine(MoveToSpot());
+        }
+        if (fallenPopConter <= 0)
+        {
+            fallenPopConter = 0.26f;
+        }
+        HeldObrs =0;
+        heldType = OrbType.ERROR;
+        CheckPickerType();       
     }
 
     
@@ -660,9 +665,44 @@ public class BoardManager : MonoBehaviour
     /// <param name="orb"></param>
     private void StoreOrb(GameObject orb)
     {
-        orb.transform.SetParent(GrabbedOrbs);
-        orb.transform.localPosition = new Vector3(0F, HeldObrs, 0F);
-        HeldObrs++;
+
+            OrbsBeingGrabed++;
+            Transform moving = orb.transform;
+            Vector3 currentPos = moving.position;
+            Vector3 EndPos = new Vector3(moving.position.x,
+                                         OobCols[(int)Mathf.Floor(moving.localPosition.x)].Last.Value.transform.position.y - 13,
+                                         moving.position.z);
+            float elapsedTime = 0f, waitTime = 0.20f - 0.01f*Cols[(int)Mathf.Floor(moving.localPosition.x)].Count;
+            orb.transform.SetParent(GrabbedOrbs);
+            HeldObrs++;
+
+            
+
+        IEnumerator PickUp()
+        {
+            while (elapsedTime <= waitTime)
+            {
+                try
+                {
+                    orb.transform.position = Vector3.Lerp(currentPos,
+                                                        EndPos,
+                                                        Mathf.Clamp((elapsedTime / waitTime), 0, 1));
+                    Debug.Log(Mathf.Clamp((elapsedTime / waitTime), 0, 1));
+                }
+                catch
+                {
+
+                }
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            orb.transform.localPosition = new Vector3(0F, HeldObrs, 0F);
+            OrbsBeingGrabed--;
+            yield return null;
+        }
+
+        StartCoroutine(PickUp());
+
 
     }
 
@@ -915,5 +955,5 @@ public class BoardManager : MonoBehaviour
             Debug.LogException(e);
             return null;
         }
-    }
 }
+    }

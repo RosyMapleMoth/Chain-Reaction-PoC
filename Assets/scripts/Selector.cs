@@ -99,7 +99,7 @@ public class Selector : MonoBehaviour
 
     public void OnDrop()
     {
-        if (gameMng.curstate == BoardManager.GameState.playing)
+        if (gameMng.curstate == BoardManager.GameState.playing && gameMng.OrbsBeingGrabed == 0)
         {
             gameMng.DropOrbs(CurCol);
         }
@@ -107,7 +107,7 @@ public class Selector : MonoBehaviour
 
     public void OnPickup()
     {
-        if (gameMng.curstate == BoardManager.GameState.playing)
+        if (gameMng.curstate == BoardManager.GameState.playing && gameMng.OrbsBeingGrabed == 0)
         {
             gameMng.AttemptGrabOrb(CurCol);
         }
