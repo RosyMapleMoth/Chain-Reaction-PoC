@@ -57,8 +57,9 @@ public class playerAddController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+                
     }
+
 
     // when a player is added make sure that lists are populated properly, and the player UI element is showen
     public void OnPlayerJoined(PlayerInput playerInput)
@@ -132,6 +133,14 @@ public class playerAddController : MonoBehaviour
 
     }
 
+
+    public void TrySelectleft()
+    {
+
+    }
+
+
+    public void T
 
 
 

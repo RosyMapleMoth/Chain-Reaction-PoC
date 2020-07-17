@@ -7,7 +7,10 @@ public class AddUiPlayer : MonoBehaviour
 {
     public playerAddController controller;
     public bool ready = false;
-    
+    public int selectedCharIndex = 0;
+
+
+
     void Start()
     {
         
@@ -43,6 +46,16 @@ public class AddUiPlayer : MonoBehaviour
             controller.UnReadyPlayer(gameObject.GetComponent<PlayerInput>());
             ready = false;
         }
+    }
+
+    public void OnMoveleft()
+    {
+
+    }
+
+    public void OnMoveright()
+    {
+
     }
 
 }
