@@ -7,7 +7,7 @@ public class AddUiPlayer : MonoBehaviour
 {
     public playerAddController controller;
     public bool ready = false;
-    public int selectedCharIndex = 0;
+
 
 
 
@@ -50,12 +50,12 @@ public class AddUiPlayer : MonoBehaviour
 
     public void OnMoveleft()
     {
-
+        controller.TrySelectleft(gameObject.GetComponent<PlayerInput>());
     }
 
     public void OnMoveright()
     {
-
+        controller.TrySelectright(gameObject.GetComponent<PlayerInput>());
     }
 
 }

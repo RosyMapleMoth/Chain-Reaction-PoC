@@ -5,28 +5,33 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using System.Linq;
+using UnityEngine.UI;
 
 
 public class playerAddController : MonoBehaviour
 {
 
-    public struct PlayerStuff
+    public class PlayerStuff
     {
         public int PlayerNum;
         public GameObject Pannal;
-       public bool Ready;
+        public bool Ready;
+        public int SelectedChar;
 
-       public InputDevice myDevice;
-
-       public void setReady(bool readySet)
-       {
-           Debug.Log("Settings ready from : " + Ready + " to " + readySet );
-           this.Ready = readySet;
-       }
+        public InputDevice myDevice;
+        public void setReady(bool readySet)
+        {
+            Debug.Log("Settings ready from : " + Ready + " to " + readySet );
+            this.Ready = readySet;
+        }
     }
 
 
     public List<GameObject> UnCheckedOutPannals;
+
+    public Dictionary<int, bool> CheckedoutChars;
+
+    public const int AmountOfChar = 4;
     public List<PlayerInput> Players;
     public Dictionary<PlayerInput, PlayerStuff> CheckedOutPannals;
 
@@ -34,6 +39,7 @@ public class playerAddController : MonoBehaviour
     void Start()
     {
         CheckedOutPannals = new Dictionary<PlayerInput, PlayerStuff>();
+        CheckedoutChars = new Dictionary<int, bool>();
 
         // load in existing players, XXX this may need to be modified before actual use due to playerInputs being disconnected form their bodies
         Players = Settings.Instance.Players;
@@ -71,7 +77,16 @@ public class playerAddController : MonoBehaviour
         thisPlayer.Pannal = UnCheckedOutPannals[0];
         thisPlayer.Ready = false;
         thisPlayer.myDevice = playerInput.devices.First();
-        thisPlayer.PlayerNum = Players.Count;
+        thisPlayer.PlayerNum = Players.Count;        
+        for (int i = 0; i < AmountOfChar; i++)
+        {
+            if (!CheckedoutChars.ContainsKey(i))
+            {
+                selectImage(thisPlayer.Pannal.transform.GetChild(2).GetChild(i).GetComponentInChildren<Image>());
+                thisPlayer.SelectedChar = i;
+                break;
+            }
+        }
 
 
         Debug.Log("player # " + thisPlayer.PlayerNum + "paird with device" + thisPlayer.myDevice.name);
@@ -90,9 +105,12 @@ public class playerAddController : MonoBehaviour
         CheckedOutPannals[playerInput].Pannal.SetActive(false);
         UnCheckedOutPannals.Add(CheckedOutPannals[playerInput].Pannal);
         UnCheckedOutPannals = UnCheckedOutPannals.OrderBy(tile => tile.name).ToList();
-        CheckedOutPannals.Remove(playerInput);
 
+        deselectImage(CheckedOutPannals[playerInput].Pannal.transform.GetChild(2).GetChild(CheckedOutPannals[playerInput].SelectedChar).GetComponentInChildren<Image>());
+
+        CheckedOutPannals.Remove(playerInput);
         Players.Remove(playerInput);
+
     }
 
 
@@ -115,33 +133,55 @@ public class playerAddController : MonoBehaviour
 
     public void ReadyPlayer(PlayerInput player)
     {
-        PlayerStuff temp = CheckedOutPannals[player];
-        temp.setReady(true);
-        CheckedOutPannals.Remove(player);
-        CheckedOutPannals.Add(player,temp);
-        CheckedOutPannals[player].Pannal.transform.GetChild(1).gameObject.SetActive(true);
+        PlayerStuff CurPlayer = CheckedOutPannals[player];
+        if (!CheckedoutChars.ContainsKey(CurPlayer.SelectedChar))
+        {
+            CheckedoutChars.Add(CurPlayer.SelectedChar,true); 
+            CurPlayer.setReady(true);
+            CurPlayer.Pannal.transform.GetChild(1).gameObject.SetActive(true);
+        }
+        
 
     }
 
     public void UnReadyPlayer(PlayerInput player)
     {
-        PlayerStuff temp = CheckedOutPannals[player];
-        temp.setReady(false);
-        CheckedOutPannals.Remove(player);
-        CheckedOutPannals.Add(player,temp);
-        CheckedOutPannals[player].Pannal.transform.GetChild(1).gameObject.SetActive(false);
+        PlayerStuff CurPlayer = CheckedOutPannals[player];
+        CheckedoutChars.Remove(CurPlayer.SelectedChar);
+        CurPlayer.setReady(false);
+        CurPlayer.Pannal.transform.GetChild(1).gameObject.SetActive(false);
 
     }
 
 
-    public void TrySelectleft()
+    public void TrySelectleft(PlayerInput player)
     {
+        int temp = CheckedOutPannals[player].SelectedChar;
+        if (!CheckedOutPannals[player].Ready && temp > 0)
+        {
+            
+            deselectImage(CheckedOutPannals[player].Pannal.transform.GetChild(2).GetChild(temp).GetComponentInChildren<Image>());
+            temp--;
+            selectImage(CheckedOutPannals[player].Pannal.transform.GetChild(2).GetChild(temp).GetComponentInChildren<Image>());
+            
+            CheckedOutPannals[player].SelectedChar = temp;
 
+        }
     }
 
+    public void TrySelectright(PlayerInput player)
+    {
+        int temp = CheckedOutPannals[player].SelectedChar;
+        if (!CheckedOutPannals[player].Ready && temp < AmountOfChar -1)
+        {
+            
+            deselectImage(CheckedOutPannals[player].Pannal.transform.GetChild(2).GetChild(temp).GetComponentInChildren<Image>());
+            temp++;
+            selectImage(CheckedOutPannals[player].Pannal.transform.GetChild(2).GetChild(temp).GetComponentInChildren<Image>());
 
-    public void T
-
+            CheckedOutPannals[player].SelectedChar = temp;
+        }
+    }
 
 
     public void TryToStart()
@@ -167,4 +207,19 @@ public class playerAddController : MonoBehaviour
         Save();
         SceneManager.LoadScene("multiPlayer");
     }
+
+
+
+    private void selectImage(Image img)
+    {
+        img.color = new Color32(255,255,255,255);
+        img.transform.localScale = new Vector3(1.2f,1.2f,1);
+    }
+
+    private void deselectImage(Image img)
+    {
+        img.color = new Color32(87,87,87,255);
+        img.transform.localScale = new Vector3(1f,1f,1f);
+    }
+
 }
