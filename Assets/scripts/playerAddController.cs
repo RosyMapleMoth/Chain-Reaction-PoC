@@ -156,16 +156,12 @@ public class playerAddController : MonoBehaviour
 
     public void TrySelectleft(PlayerInput player)
     {
-        int temp = CheckedOutPannals[player].SelectedChar;
-        if (!CheckedOutPannals[player].Ready && temp > 0)
+        PlayerStuff curPlayer = CheckedOutPannals[player];
+        if (!curPlayer.Ready && curPlayer.SelectedChar > 0)
         {
-            
-            deselectImage(CheckedOutPannals[player].Pannal.transform.GetChild(2).GetChild(temp).GetComponentInChildren<Image>());
-            temp--;
-            selectImage(CheckedOutPannals[player].Pannal.transform.GetChild(2).GetChild(temp).GetComponentInChildren<Image>());
-            
-            CheckedOutPannals[player].SelectedChar = temp;
-
+            deselectImage(curPlayer.Pannal.transform.GetChild(2).GetChild(curPlayer.SelectedChar).GetComponentInChildren<Image>());
+            curPlayer.SelectedChar--;
+            selectImage(curPlayer.Pannal.transform.GetChild(2).GetChild(curPlayer.SelectedChar).GetComponentInChildren<Image>());
         }
     }
 
