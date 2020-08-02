@@ -45,6 +45,8 @@ public class BoardManager : MonoBehaviour
     public enum GameState {starting,puase,playing,over};
     public float StartingUp;
 
+    public score test;
+
     // This keeps track of orbs currently being grabbed,
     // we should not be able to shoot orbs until Orbs Beinggrabed is zero
     public int OrbsBeingGrabed;
@@ -74,6 +76,9 @@ public class BoardManager : MonoBehaviour
         {
             OobCols[i] = new LinkedList<GameObject>();
         }
+
+        test = new score();
+        Debug.Log(test.getvisableScore());
 
         dropQue = new Queue<Pattern>();
 
