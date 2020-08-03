@@ -52,6 +52,8 @@ public class BoardManager : MonoBehaviour
     public int OrbsBeingGrabed;
 
 
+    private int level = 0;
+
 
     
     
@@ -159,7 +161,7 @@ public class BoardManager : MonoBehaviour
         {
             Debug.unityLogger.Log("Genreal", "Lines Moving down");
             DropLine(1);
-            timeUntilDrop = DropSpeed;
+            timeUntilDrop = DropSpeed - level*(0.25f);
         }
 
 
@@ -227,6 +229,10 @@ public class BoardManager : MonoBehaviour
     }
 
 
+    public void levelUp()
+    {
+        level++;
+    }
 
 
 
