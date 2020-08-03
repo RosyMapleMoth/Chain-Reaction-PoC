@@ -45,7 +45,7 @@ public class BoardManager : MonoBehaviour
     public enum GameState {starting,puase,playing,over};
     public float StartingUp;
 
-    public score test;
+    public score playerScore;
 
     // This keeps track of orbs currently being grabbed,
     // we should not be able to shoot orbs until Orbs Beinggrabed is zero
@@ -77,8 +77,6 @@ public class BoardManager : MonoBehaviour
             OobCols[i] = new LinkedList<GameObject>();
         }
 
-        test = new score();
-        Debug.Log(test.getvisableScore());
 
         dropQue = new Queue<Pattern>();
 
@@ -195,6 +193,16 @@ public class BoardManager : MonoBehaviour
                 endPopingOrbs();
                 checkForFalling();
                 evaluateOrbs();
+                playerScore.finializePop();
+                if (!CurrentlyPoping)
+                {
+                    playerScore.resetChain();
+                }
+                else
+                {
+                    playerScore.incressChain();
+                }
+                
                 PopTimer = POPTIMERMAX;
             }
         }
@@ -261,6 +269,7 @@ public class BoardManager : MonoBehaviour
                 Orb temporb = orb.GetComponent<Orb>();
                 if (temporb.curState == Orb.OrbState.ToPop)
                 {
+                    playerScore.scoreBlock();
                     Debug.unityLogger.Log("Start Orb Pop", temporb + " has begun To Pop");
                     orb.GetComponentInChildren<Animator>().SetTrigger("pop");
                     temporb.curState = Orb.OrbState.Poping;
@@ -282,7 +291,6 @@ public class BoardManager : MonoBehaviour
                 Debug.unityLogger.Log("End Orb Pop", "Orb " + temporb.name + " is being checked");
                 if (temporb.curState == Orb.OrbState.Poping)
                 {
-                    
                     Vector3 temp = temporb.GetComponent<Orb>().GetRelPos();
                     Cols[(int)temp.x].Remove(temporb.gameObject);
                     Destroy(temporb.gameObject);
@@ -736,16 +744,12 @@ public class BoardManager : MonoBehaviour
                 CheckPickerType();
                 AttemptGrabOrb(Line);
             }
-            else
+            else if (Cols[Line].Last.Value.GetComponent<Orb>().checkOrbType(heldType))
             {
-                if (Cols[Line].Last.Value.GetComponent<Orb>().checkOrbType(heldType) 
-                && ( Cols[Line].Last.Value.GetComponent<Orb>().curState == Orb.OrbState.Resting
-                || Cols[Line].Last.Value.GetComponent<Orb>().curState == Orb.OrbState.Evaluating ) )
-                {
-                    StoreOrb(Cols[Line].Last.Value);
-                    Cols[Line].RemoveLast();
-                    AttemptGrabOrb(Line);
-                }
+                StoreOrb(Cols[Line].Last.Value);
+                Cols[Line].RemoveLast();
+                AttemptGrabOrb(Line);
+            
             }
         }
     }
@@ -957,7 +961,7 @@ public class BoardManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            //Debug.LogException(e);
             return null;
         }
 }

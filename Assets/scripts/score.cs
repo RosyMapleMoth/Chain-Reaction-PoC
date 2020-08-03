@@ -7,14 +7,17 @@ public class score : MonoBehaviour
 {
 
     private int ScoreVal = 0; 
-    private int multiplyer = 0;
+    private int incomingChange = 0;
+    private int multiplyer = 1;
     private int chain = 0;
 
     //basic score gained form popoing a block
     private const int BaseBlockVal = 100;
 
     public Text Score;
+    public Text addedScore;
 
+    public Text Chain; 
     // Start is called before the first frame update
     void Start()
     {
@@ -24,7 +27,7 @@ public class score : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        updateScoreView();
     }
 
 
@@ -46,16 +49,9 @@ public class score : MonoBehaviour
 
     public void scoreBlock()
     {
-        if (chain == 0)
-        {
-            ScoreVal += BaseBlockVal * multiplyer;
-            Debug.Log("Score : adding " + BaseBlockVal * multiplyer + " To player score");
-        }
-        else
-        {
-            ScoreVal += BaseBlockVal * chain * multiplyer;
-            Debug.Log("Score : adding " + BaseBlockVal * chain * multiplyer + " To player score");
-        }
+        
+        incomingChange += BaseBlockVal * (chain + 1) * multiplyer;
+        Debug.Log("Score : adding " + BaseBlockVal * chain * multiplyer + " To player score");
     }
 
     public void resetScore()
@@ -68,6 +64,16 @@ public class score : MonoBehaviour
     {
         ScoreVal += add;
     }
+
+    public void finializePop()
+    {
+
+        ScoreVal += incomingChange;
+        addedScore.text = incomingChange.ToString();
+        Chain.text = "Chain :" + (chain + 1).ToString();
+        incomingChange = 0;
+    }
+
 
     private void updateScoreView()
     {
