@@ -11,6 +11,10 @@ public class score : MonoBehaviour
     private int multiplyer = 1;
     private int chain = 0;
 
+    public int level = 1;
+
+    private int xpRequirement;
+
     //basic score gained form popoing a block
     private const int BaseBlockVal = 100;
 
@@ -71,6 +75,12 @@ public class score : MonoBehaviour
         ScoreVal += incomingChange;
         addedScore.text = incomingChange.ToString();
         Chain.text = "Chain :" + (chain + 1).ToString();
+
+        if (ScoreVal > level * 5000)
+        {
+            level++;
+        }
+
         incomingChange = 0;
     }
 

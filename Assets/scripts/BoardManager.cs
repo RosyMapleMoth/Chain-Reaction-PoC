@@ -157,11 +157,11 @@ public class BoardManager : MonoBehaviour
 
         // calculation of when board should update
         timeUntilDrop -= Time.deltaTime;
-        if (timeUntilDrop <= 0)
+        if (timeUntilDrop <= 0 && !CurrentlyPoping)
         {
             Debug.unityLogger.Log("Genreal", "Lines Moving down");
             DropLine(1);
-            timeUntilDrop = DropSpeed - level*(0.25f);
+            timeUntilDrop = DropSpeed - (playerScore.level-1)*(0.25f);
         }
 
 
@@ -221,7 +221,7 @@ public class BoardManager : MonoBehaviour
 
         foreach (LinkedList<GameObject> i in Cols)
         {
-            if (i.Count >= MAXORBS)
+            if (i.Count >= MAXORBS && !CurrentlyPoping)
             {
                 curstate = GameState.over;
             }
@@ -403,7 +403,8 @@ public class BoardManager : MonoBehaviour
     /// <param name="ancor">The position to position derectly below: the last orb to be in the correct relative position in the same row</param>
     private void checkNode(GameObject orb, GameObject ancor, int depth, int Line)
     {
-        if (Mathf.Ceil(orb.transform.position.y) != Mathf.Ceil(ancor.transform.position.y) - 1 || ancor.GetComponent<Orb>().curState == Orb.OrbState.Falling)
+        if (Mathf.Ceil(orb.transform.position.y) != Mathf.Ceil(ancor.transform.position.y) - 1 
+         || ancor.GetComponent<Orb>().curState == Orb.OrbState.Falling)
         {
             orb.GetComponent<Orb>().curState = Orb.OrbState.Falling;
             
@@ -451,7 +452,10 @@ public class BoardManager : MonoBehaviour
                     Debug.LogException(e);
                 }
 
-                orb.GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
+                if (orb.GetComponent<Orb>().curState != Orb.OrbState.Poping)
+                {
+                    orb.GetComponent<Orb>().curState = Orb.OrbState.Evaluating;
+                }
                 Debug.unityLogger.Log("Fall(checkNode)" + orb.name, "ending fall for " + orb.name);
                 yield return null;
             }
@@ -706,7 +710,6 @@ public class BoardManager : MonoBehaviour
                     orb.transform.position = Vector3.Lerp(currentPos,
                                                         EndPos,
                                                         Mathf.Clamp((elapsedTime / waitTime), 0, 1));
-                    Debug.Log(Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                 }
                 catch
                 {
