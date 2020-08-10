@@ -159,9 +159,10 @@ public class BoardManager : MonoBehaviour
         timeUntilDrop -= Time.deltaTime;
         if (timeUntilDrop <= 0 && !CurrentlyPoping)
         {
-            Debug.unityLogger.Log("Genreal", "Lines Moving down");
+            Debug.unityLogger.Log("Genreal", "Lines Moving down start");
             DropLine(1);
             timeUntilDrop = DropSpeed - (playerScore.level-1)*(0.25f);
+            Debug.unityLogger.Log("Genreal", "Lines Moving down end");
         }
 
 
@@ -596,9 +597,10 @@ public class BoardManager : MonoBehaviour
                 ancorOrb = OobCols[Line].Last.Value;
             }
 
+           
 
             Transform moveingOrb = GrabbedOrbs.GetChild(GrabbedOrbs.childCount-1);
-
+             Debug.Log("Dropping " +  GrabbedOrbs.GetChild(GrabbedOrbs.childCount-1).ToString());
             Vector3 start = moveingOrb.position;
             moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
             moveingOrb.GetChild(0).position = start;
@@ -692,6 +694,7 @@ public class BoardManager : MonoBehaviour
             OrbsBeingGrabed++;
             Transform moving = orb.transform;
             Vector3 currentPos = moving.position;
+            Debug.Log("picking up " + orb.name + " from position : " + moving.position.ToString());
             Vector3 EndPos = new Vector3(moving.position.x,
                                          OobCols[(int)Mathf.Floor(moving.localPosition.x)].Last.Value.transform.position.y - 13,
                                          moving.position.z);
@@ -747,6 +750,8 @@ public class BoardManager : MonoBehaviour
             if (HeldObrs == 0)
             {
                 GameObject temp = Cols[Line].Last.Value;
+
+                Debug.Log("Pick Up : Picking up first orb " + temp.name);
                 Cols[Line].RemoveLast();
                 heldType = temp.GetComponent<Orb>().GetOrbType();
                 StoreOrb(temp);
@@ -755,6 +760,7 @@ public class BoardManager : MonoBehaviour
             }
             else if (Cols[Line].Last.Value.GetComponent<Orb>().checkOrbType(heldType))
             {
+                Debug.Log("Pick Up : Picking up additional orb " + Cols[Line].Last.Value.name);
                 StoreOrb(Cols[Line].Last.Value);
                 Cols[Line].RemoveLast();
                 AttemptGrabOrb(Line);
@@ -961,16 +967,23 @@ public class BoardManager : MonoBehaviour
 
         try
         {
-            LinkedListNode<GameObject> node = Cols[x].First;
-            for (int i = 0; i < y; i++)
+            if (Cols[x].Count > 0 && )
             {
-                node = node.Next;
+                LinkedListNode<GameObject> node = Cols[x].First;
+                for (int i = 0; i < y; i++)
+                {
+                    node = node.Next;
+                }
+                return node.Value;
             }
-            return node.Value;
+            else
+            {
+                return null;
+            }
         }
         catch (Exception e)
         {
-            //Debug.LogException(e);
+            Debug.LogException(e);
             return null;
         }
 }

@@ -13,7 +13,7 @@ public class score : MonoBehaviour
 
     public int level = 1;
 
-    private int xpRequirement;
+    private int xpRequirement = 5000;
 
     //basic score gained form popoing a block
     private const int BaseBlockVal = 100;
@@ -76,7 +76,7 @@ public class score : MonoBehaviour
         addedScore.text = incomingChange.ToString();
         Chain.text = "Chain :" + (chain + 1).ToString();
 
-        if (ScoreVal > level * 5000)
+        if (ScoreVal > level * xpRequirement)
         {
             level++;
         }
