@@ -967,7 +967,7 @@ public class BoardManager : MonoBehaviour
 
         try
         {
-            if (Cols[x].Count > 0 && )
+            if (Cols[x].Count > 0)
             {
                 LinkedListNode<GameObject> node = Cols[x].First;
                 for (int i = 0; i < y; i++)
