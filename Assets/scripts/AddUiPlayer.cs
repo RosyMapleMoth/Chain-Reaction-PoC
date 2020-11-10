@@ -24,19 +24,18 @@ public class AddUiPlayer : MonoBehaviour
 
     public void OnPickup()
     {
-        if (ready)
+        if (controller.amIReady(gameObject.GetComponent<PlayerInput>()))
         {
             controller.TryToStart();
         }
         else
         {
             controller.ReadyPlayer(gameObject.GetComponent<PlayerInput>());
-            ready = true;
         }
     }
     public void OnDrop()
     {
-        if (!ready)
+        if (!controller.amIReady(gameObject.GetComponent<PlayerInput>()))
         {
             controller.OnPlayerleft(gameObject.GetComponent<PlayerInput>());
             Destroy(gameObject);
@@ -44,7 +43,6 @@ public class AddUiPlayer : MonoBehaviour
         else
         {
             controller.UnReadyPlayer(gameObject.GetComponent<PlayerInput>());
-            ready = false;
         }
     }
 

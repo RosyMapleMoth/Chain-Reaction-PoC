@@ -204,6 +204,11 @@ public class playerAddController : MonoBehaviour
         SceneManager.LoadScene("multiPlayer");
     }
 
+    public bool amIReady(PlayerInput player)
+    {
+        return CheckedOutPannals[player].Ready;
+
+    }
 
 
     private void selectImage(Image img)
