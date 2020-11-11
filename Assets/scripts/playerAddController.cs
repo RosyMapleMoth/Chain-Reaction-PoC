@@ -193,15 +193,32 @@ public class playerAddController : MonoBehaviour
             }
         }
         if (fullcheck)
-        {
-            startGame();
+        { 
+            startGame(Players.Count);
         }
     }
 
-    private void startGame()
+    private void startGame(int amountOfPlayers)
     {
-        Save();
-        SceneManager.LoadScene("multiPlayer");
+        switch (amountOfPlayers)
+            {
+                case 1:
+                    break;
+                case 2:
+                    Save();
+                    SceneManager.LoadScene("Two Player");
+                    break;
+                case 3:
+                    Save();
+                    SceneManager.LoadScene("Three Player");
+                    break;
+                case 4:
+                    Save();
+                    SceneManager.LoadScene("Four Player");
+                    break;
+                default:
+                    break;
+            }
     }
 
     public bool amIReady(PlayerInput player)
