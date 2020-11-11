@@ -33,6 +33,8 @@ public class AddUiPlayer : MonoBehaviour
             controller.ReadyPlayer(gameObject.GetComponent<PlayerInput>());
         }
     }
+
+    
     public void OnDrop()
     {
         if (!controller.amIReady(gameObject.GetComponent<PlayerInput>()))
