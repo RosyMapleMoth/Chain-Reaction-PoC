@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Users;
 
 public class Settings : MonoBehaviour
 {
 
 
-    public List<PlayerInput> Players;
+    public List<InputUser> Players;
+    public List<InputDevice> Devices;
 
     public List<playerAddController.PlayerStuff> playerData;
 
@@ -22,7 +24,8 @@ public class Settings : MonoBehaviour
         if (Instance == null)
         {
             DontDestroyOnLoad(gameObject);
-            Players = new List<PlayerInput>();
+            Players = new List<InputUser>();
+            Devices = new List<InputDevice>();
             Instance = this;
         }
         else if (Instance != this)
@@ -40,7 +43,6 @@ public class Settings : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
     }
 
 

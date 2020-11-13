@@ -29,6 +29,11 @@ public class MainMenuController : MonoBehaviour
 
     public void exit()
     {
+        Application.Quit();
+    }
+
+    public void multiPlayer()
+    {
         SceneManager.LoadScene("add players");
     }
 
@@ -36,5 +41,6 @@ public class MainMenuController : MonoBehaviour
     {
         SceneManager.LoadScene("Settings");
     }   
+
 
 }
