@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
+using UnityEngine.UI;
 
 public class MultiplayerHandler : MonoBehaviour
 {
     public List<PlayerInput> Players;
+    public List<Image> portrats;
+
+    public List<Sprite> possablePortrats;
 
     // Start is called before the first frame update
     void Start()
@@ -24,6 +28,7 @@ public class MultiplayerHandler : MonoBehaviour
     {
         for (int i = 0; i < Players.Count; i++)
         {
+            portrats[i].sprite = possablePortrats[Settings.Instance.playerData[i].SelectedChar];
             Debug.Log("setting player " + i + " with device " + Settings.Instance.Devices[i]);
             Players[i].user.UnpairDevices();
             InputUser.PerformPairingWithDevice(Settings.Instance.Devices[i],Players[i].user);

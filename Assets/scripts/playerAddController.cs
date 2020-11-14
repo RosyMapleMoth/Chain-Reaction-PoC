@@ -41,22 +41,7 @@ public class playerAddController : MonoBehaviour
         CheckedOutPannals = new Dictionary<PlayerInput, PlayerStuff>();
         CheckedoutChars = new Dictionary<int, bool>();
 
-        // load in existing players, XXX this may need to be modified before actual use due to playerInputs being disconnected form their bodies
         Players = new List<PlayerInput>();
-
-        // set up lists as thought the players joined, we may still have the bodieless issue of the players
-        foreach (PlayerInput playerInput in Players)
-        {
-            Players.Add(playerInput);
-            PlayerStuff thisPlayer = new PlayerStuff();
-            thisPlayer.Pannal = UnCheckedOutPannals[0];
-            thisPlayer.Ready = false;
-            thisPlayer.PlayerNum = Players.Count;
-            CheckedOutPannals.Add(playerInput, thisPlayer);
-            CheckedOutPannals[playerInput].Pannal.SetActive(true);
-            UnCheckedOutPannals.RemoveAt(0);
-            playerInput.GetComponent<AddUiPlayer>().controller = gameObject.GetComponent<playerAddController>();
-        }
     }
 
     // Update is called once per frame
@@ -117,6 +102,7 @@ public class playerAddController : MonoBehaviour
     {
         foreach (PlayerInput player in Players)
         {
+            Settings.Instance.playerData.Add(CheckedOutPannals[player]);
             Settings.Instance.Players.Add(player.user); 
             Settings.Instance.Devices.Add(player.user.pairedDevices[0]);
         }
@@ -186,7 +172,6 @@ public class playerAddController : MonoBehaviour
         }
         if (fullcheck)
         { 
-            Save();
             startGame(Players.Count);
         }
     }

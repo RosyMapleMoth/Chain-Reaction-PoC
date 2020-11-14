@@ -13,6 +13,7 @@ public class Settings : MonoBehaviour
 
     public List<playerAddController.PlayerStuff> playerData;
 
+
     public static Settings Instance;
 
     public float Vol;
@@ -25,7 +26,9 @@ public class Settings : MonoBehaviour
         {
             DontDestroyOnLoad(gameObject);
             Players = new List<InputUser>();
+            playerData = new List<playerAddController.PlayerStuff>();
             Devices = new List<InputDevice>();
+
             Instance = this;
         }
         else if (Instance != this)
