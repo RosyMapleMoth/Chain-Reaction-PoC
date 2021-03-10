@@ -983,7 +983,7 @@ public class BoardManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            Debug.Log(e);
             return null;
         }
 }

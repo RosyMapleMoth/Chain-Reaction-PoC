@@ -28,10 +28,16 @@ public class MultiplayerHandler : MonoBehaviour
     {
         for (int i = 0; i < Players.Count; i++)
         {
-            portrats[i].sprite = possablePortrats[Settings.Instance.playerData[i].SelectedChar];
+            try {
+                portrats[i].sprite = possablePortrats[Settings.Instance.playerData[i].SelectedChar];
             Debug.Log("setting player " + i + " with device " + Settings.Instance.Devices[i]);
             Players[i].user.UnpairDevices();
             InputUser.PerformPairingWithDevice(Settings.Instance.Devices[i],Players[i].user);
+            }
+            catch
+            {
+                Debug.Log("uwu down't have enough contwowwews pwugged in. No pwayews set up");
+            }
         }
     }
 
