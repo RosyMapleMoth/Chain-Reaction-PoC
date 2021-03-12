@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Selector : MonoBehaviour
 {
-
+    public playerGameOverHandler afterGameMenu;
     public LineRenderer selectLine;
     public GameObject Cursor;
     private int CurCol = 3;
@@ -118,34 +118,47 @@ public class Selector : MonoBehaviour
 
     public void OnMoveleft()
     {
-        Debug.Log("left");
-        if (CurCol > MIN_BOARD_SIZE && gameMng.curstate == BoardManager.GameState.playing)
+
+        if (gameMng.isGameOver)
         {
-            // if we are already moving snap to target
-            if (moving)
+            afterGameMenu.OnMoveleft();
+        }
+        else
+        {        
+            if (CurCol > MIN_BOARD_SIZE && gameMng.curstate == BoardManager.GameState.playing)
             {
+                // if we are already moving snap to target
+                if (moving)
+                {
+                    
+                    transform.position = MoveTarget;
+
+                }
                 
-                transform.position = MoveTarget;
+                // set movement start and end positions
+                MoveStart = transform.position;
+                MoveTarget = new Vector3(transform.position.x - 1, transform.position.y, transform.position.z);
 
+                // set up move helper to be active
+                moving = true;
+                elapsedTime = 0.00f;
+                
+                // update the col data
+                CurCol -= 1; 
             }
-            
-            // set movement start and end positions
-            MoveStart = transform.position;
-            MoveTarget = new Vector3(transform.position.x - 1, transform.position.y, transform.position.z);
-
-            // set up move helper to be active
-            moving = true;
-            elapsedTime = 0.00f;
-            
-            // update the col data
-            CurCol -= 1; 
         }
     }
 
     public void OnMoveright()
     {
-        if (CurCol < MAX_BOARD_SIZE && CurCol < MAX_BOARD_SIZE  && gameMng.curstate == BoardManager.GameState.playing)
-        {      
+        if (gameMng.isGameOver)
+        {
+            afterGameMenu.OnMoveright();
+        }
+        else
+        {
+            if (CurCol < MAX_BOARD_SIZE && CurCol < MAX_BOARD_SIZE  && gameMng.curstate == BoardManager.GameState.playing)
+            {      
             // if we are already moving snap to target
             if (moving)
             {
@@ -161,6 +174,7 @@ public class Selector : MonoBehaviour
 
 
             CurCol += 1;
+            }
         }
     }
 

@@ -2,27 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ControlMenuController : MonoBehaviour
+public class animationCatch : MonoBehaviour
 {
-    public KeyCode P1L, P1R, P1D, P1P, P1PU, P2L, P2R, P2U, P2P, P2PU;
-
-    
-
-
+    public Animator menu;
     // Start is called before the first frame update
     void Start()
     {
- 
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-         
+        
     }
 
 
-
-    
-
+    public void startMenuDrop()
+    {
+        menu.gameObject.SetActive(true);
+        menu.SetTrigger("start");
+    }
 }

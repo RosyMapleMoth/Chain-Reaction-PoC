@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
-
+using UnityEngine.Events;
 public class BoardManager : MonoBehaviour
 {
+
+    public UnityEvent GameOver = new UnityEvent();
     private const float POPTIMERMAX = 1;
     private const float FALLTIMEMAX = 0.25f;
     private const int MAXORBS = 12;
@@ -20,7 +22,7 @@ public class BoardManager : MonoBehaviour
     static private int SPAWN_Y_Val = 7;
     static private int SPAWN_X_VAL = -4;
     public GameObject switcher;
-    public GameObject GameOver;
+    public GameObject GameOverUI;
     public int HeldObrs = 0;
     public OrbType heldType = OrbType.ERROR;
     public LinkedList<GameObject>[] Cols;
@@ -44,7 +46,7 @@ public class BoardManager : MonoBehaviour
     public GameState curstate;
     public enum GameState {starting,puase,playing,over};
     public float StartingUp;
-
+    public bool isGameOver = false;
     public score playerScore;
 
     // This keeps track of orbs currently being grabbed,
@@ -115,10 +117,10 @@ public class BoardManager : MonoBehaviour
             case GameState.puase:
                 break;
             case GameState.over:
-                GameOver.SetActive(true);
                 break;
         }
     }
+
 
 
     public void startingUpdate()
@@ -224,7 +226,8 @@ public class BoardManager : MonoBehaviour
         {
             if (i.Count >= MAXORBS && !CurrentlyPoping)
             {
-                curstate = GameState.over;
+                endGame();
+                break;
             }
         }
     }
@@ -236,6 +239,14 @@ public class BoardManager : MonoBehaviour
     }
 
 
+    public void endGame()
+    {
+        GameOver.Invoke();
+        isGameOver = true;
+        curstate = GameState.over;
+
+
+    }
 
 
     private void evaluateOrbs()
