@@ -287,18 +287,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &149171144 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2834629642010488632, guid: 3908cc17421323a4b91de2fb6da5eaec,
-    type: 3}
-  m_PrefabInstance: {fileID: 8685713686835881113}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &602374236 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6797189367088194264, guid: 3908cc17421323a4b91de2fb6da5eaec,
@@ -329,6 +317,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a88548f3746c5f14c8b94a59269121e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 0}
 --- !u!1 &648370070
 GameObject:
   m_ObjectHideFlags: 0
@@ -865,7 +854,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_TargetGraphic
       value: 
-      objectReference: {fileID: 149171144}
+      objectReference: {fileID: 0}
     - target: {fileID: 1445722448608400010, guid: 3908cc17421323a4b91de2fb6da5eaec,
         type: 3}
       propertyPath: m_Colors.m_HighlightedColor.r

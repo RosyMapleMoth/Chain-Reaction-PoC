@@ -69,7 +69,7 @@ public class BoardManager : MonoBehaviour
     {
         orbIDNext = 0;
         Cols = new LinkedList<GameObject>[7];
-        for (int i = 0; i<7; i++)
+        for (int i = 0; i < 7; i++)
         {
             Cols[i] = new LinkedList<GameObject>();
         }
@@ -95,7 +95,7 @@ public class BoardManager : MonoBehaviour
         fallenOrbs = new LinkedList<GameObject>();
         toPopOrbs = new Queue<GameObject>();
         CurrentlyPoping = false;
-        StartingUp = 3f;
+        StartingUp = 1f;
         OrbsBeingGrabed = 0;
     }
 
@@ -539,7 +539,7 @@ public class BoardManager : MonoBehaviour
             {
                 GameObject temp;
 
-                temp = Instantiate(orbPrefab, new Vector3(transform.position.x + SPAWN_X_VAL + r + .1f, transform.position.y + SPAWN_Y_Val +  reserveLines - 0.1f, ORB_VIEW_LAYER), Quaternion.identity);
+                temp = Instantiate(orbPrefab, new Vector3(transform.position.x + SPAWN_X_VAL + r, transform.position.y + SPAWN_Y_Val +  reserveLines, ORB_VIEW_LAYER), Quaternion.identity);
                 temp.name = "orb " + orbIDNext.ToString();
                 temp.transform.GetChild(1).GetComponentInChildren<Text>().text = temp.name;
                 orbIDNext = orbIDNext+1;
@@ -631,7 +631,7 @@ public class BoardManager : MonoBehaviour
                 float elapsedTime = 0;
                 float waitTime = 0.25f - 0.01f*Cols[Line].Count;
                 Transform moving = moveingOrb.GetChild(0);
-                moving.position = new Vector3(moveingOrb.transform.position.x + 0.4f,-5 - 0.4f,0);
+                moving.position = new Vector3(moveingOrb.transform.position.x + 0.5f,-5 - 0.5f,0);
                 Vector3 currentPos = moving.position;
                 
                 while (elapsedTime < waitTime)
@@ -641,8 +641,8 @@ public class BoardManager : MonoBehaviour
                     try
                     {
                         moving.position = Vector3.Lerp(currentPos,
-                                                            new Vector3(moveingOrb.transform.position.x + 0.4f,
-                                                                        moveingOrb.position.y - 0.4f,
+                                                            new Vector3(moveingOrb.transform.position.x + 0.5f,
+                                                                        moveingOrb.position.y - 0.5f,
                                                                         moveingOrb.transform.position.z),
                                                             Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                     }
@@ -657,8 +657,8 @@ public class BoardManager : MonoBehaviour
                 try
                 {
                     moving.position = Vector3.Lerp(currentPos,
-                                                            new Vector3(moveingOrb.transform.position.x + 0.4f,
-                                                                        moveingOrb.position.y - 0.4f,
+                                                            new Vector3(moveingOrb.transform.position.x + 0.5f,
+                                                                        moveingOrb.position.y - 0.5f,
                                                                         moveingOrb.transform.position.z),
                                                             1);
                 }
