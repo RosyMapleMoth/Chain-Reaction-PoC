@@ -1,12 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class playerGameOverHandler : MonoBehaviour
 {
+    public UnityEvent OptionSelected = new UnityEvent();
+    public UnityEvent OptionDeselected = new UnityEvent();
     public Text GameOverText;
     public PlayerInput player;
     public InputDevice myDevice;
@@ -14,25 +18,36 @@ public class playerGameOverHandler : MonoBehaviour
     public GameObject GameOverUi;
     public GameObject GameOverbackroundUi;
     
-    public int selected = 0;
+    /*
+        What option is currently hovered
+            0 -> Restart
+            1 -> Char elect
+            2 -> Main Menu
+    */  
+    public int hovered = 0;
+
+    // if player has locked in a choice
+    private bool lockedIn = true; 
 
 
-    // Start is called before the first frame update
-    void Start()
+
+    /// <summary>
+    /// Makes Game Over UI show up.
+    /// </summary>
+    public void endGame(int place)
     {
+        setEndGameText(place);
+        GameOverbackroundUi.SetActive(true);
+        GameOverbackroundUi.GetComponent<Animator>().SetTrigger("start");
     }
 
-    // Update is called once per frame
-    void Update()
+
+
+    /// <summary>
+    /// Sets end game text to fit with the end place passed in.
+    /// </summary>
+    private void setEndGameText(int place)
     {
-        
-    }
-
-
-    public void endGame(int place, int playerNum)
-    {
-        //GameOverUi.SetActive(true);
-
         string gameOverText;
         switch (place)
         {
@@ -43,54 +58,70 @@ public class playerGameOverHandler : MonoBehaviour
             default: gameOverText = "UwU something brokeie wokie"; break;
         } 
 
-
-
         GameOverText.text = gameOverText;
-        GameOverbackroundUi.SetActive(true);
-
-        //GameOverUi.GetComponent<Animator>().SetTrigger("start");
-        GameOverbackroundUi.GetComponent<Animator>().SetTrigger("start");
-
-      
     }
 
-
-    public void OnPickup()
-    {
-        // select
-    }
 
     
+    /// function Catchers for InputManger
+
+    // Select 
+    public void OnPickup()
+    {
+        lockedIn = true;
+        uiSelect(hovered);
+        OptionSelected.Invoke();
+    }
+
+    // Deselect
     public void OnDrop()
     {
-        // deselect
+        lockedIn = false;
+        uiDeselect(hovered);
+        OptionDeselected.Invoke();
     }
 
     public void OnMoveleft()
     {
-        if (selected > 0)
+        if (hovered > 0 && !lockedIn)
         {
-            deselect(selected--);
-            select(selected);
+            uiEndHighlight(hovered--);
+            uiStartHighlight(hovered);
         }
     }
 
     public void OnMoveright()
     {
-        if (selected < 2)
+        if (hovered < 2 && !lockedIn)
         {
-            deselect(selected++);
-            select(selected);
+            uiEndHighlight(hovered++);
+            uiStartHighlight(hovered);
         }
     }
 
-    public void deselect(int index)
+    private void uiStartHighlight(int index)
     {
-        gameObject.transform.GetChild(index).GetComponent<Animator>().SetTrigger("deselect");
+        gameObject.transform.GetChild(index).GetComponent<Animator>().SetBool("selected",true);
     }
 
-    public void select(int index)
+    private void uiEndHighlight(int index)
     {
-        gameObject.transform.GetChild(index).GetComponent<Animator>().SetTrigger("select");
+        gameObject.transform.GetChild(index).GetComponent<Animator>().SetBool("selected", false);
     }
+
+    private void uiSelect(int index)
+    {
+        // TODO : add UI Juice 
+            // maybe don't do this while UI is in porcess of chaning
+    }
+    private void uiDeselect(int index)
+    {
+        // TODO : add UI Juice 
+            // maybe don't do this while UI is in porcess of chaning
+    }
+
+
+
+
+
 }

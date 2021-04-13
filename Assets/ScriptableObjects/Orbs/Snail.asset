@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88b7a3ce3cebea94c9c2856f5ae7054f, type: 3}
-  m_Name: Slug
+  m_Name: Snail
   m_EditorClassIdentifier: 
-  orbColor: {fileID: 0}
-  orbType: 0
+  orbColor: {fileID: 21300000, guid: 775e580abd88201479a6ab6307a2b0cf, type: 3}
+  orbType: 9

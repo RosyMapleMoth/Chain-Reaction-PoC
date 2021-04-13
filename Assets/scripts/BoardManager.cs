@@ -12,6 +12,12 @@ public class BoardManager : MonoBehaviour
     private const float POPTIMERMAX = 1;
     private const float FALLTIMEMAX = 0.25f;
     private const int MAXORBS = 12;
+
+    // off set's to fix orbs being center pivited
+    public const float X_OFF_SET = 0.5f;
+    public const float Y_OFF_SET = -0.5f;
+
+
     private float timeUntilDrop = 0f;
     private int incomingLines = 1;
     private int reserveLines = 0;
@@ -372,7 +378,7 @@ public class BoardManager : MonoBehaviour
 
 
     /// <summary>
-    /// 
+    /// TODO : Review this function
     /// </summary>
     private void checkForFalling()
     {
@@ -427,7 +433,7 @@ public class BoardManager : MonoBehaviour
             {
                 float elapsedTime = 0;
                 float waitTime = 0.1f;
-                orb.transform.GetChild(0).position = new Vector3(start.x + 0.4f,start.y- 0.4f,start.z);;
+                orb.transform.GetChild(0).position = new Vector3(start.x + X_OFF_SET, start.y + Y_OFF_SET,start.z);;
                 Vector3 currentPos = orb.transform.GetChild(0).position;
                 
 
@@ -439,7 +445,7 @@ public class BoardManager : MonoBehaviour
                     {
                         orb.transform.GetChild(0).position = Vector3.Lerp(currentPos,
                                                               new Vector3(currentPos.x,
-                                                                           orb.transform.position.y - 0.4f,
+                                                                           orb.transform.position.y + Y_OFF_SET,
                                                                            currentPos.z),
                                                              Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                     }
@@ -455,7 +461,7 @@ public class BoardManager : MonoBehaviour
                 {
                     orb.transform.GetChild(0).position = Vector3.Lerp(currentPos,
                                                               new Vector3(currentPos.x,
-                                                                           orb.transform.position.y - 0.4f,
+                                                                           orb.transform.position.y + Y_OFF_SET,
                                                                            currentPos.z),
                                                              1);
                 }
@@ -631,7 +637,7 @@ public class BoardManager : MonoBehaviour
                 float elapsedTime = 0;
                 float waitTime = 0.25f - 0.01f*Cols[Line].Count;
                 Transform moving = moveingOrb.GetChild(0);
-                moving.position = new Vector3(moveingOrb.transform.position.x + 0.5f,-5 - 0.5f,0);
+                moving.position = new Vector3(moveingOrb.transform.position.x + X_OFF_SET,-5 + Y_OFF_SET,0);
                 Vector3 currentPos = moving.position;
                 
                 while (elapsedTime < waitTime)
@@ -641,8 +647,8 @@ public class BoardManager : MonoBehaviour
                     try
                     {
                         moving.position = Vector3.Lerp(currentPos,
-                                                            new Vector3(moveingOrb.transform.position.x + 0.5f,
-                                                                        moveingOrb.position.y - 0.5f,
+                                                            new Vector3(moveingOrb.transform.position.x + X_OFF_SET,
+                                                                        moveingOrb.position.y + Y_OFF_SET,
                                                                         moveingOrb.transform.position.z),
                                                             Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                     }
@@ -657,8 +663,8 @@ public class BoardManager : MonoBehaviour
                 try
                 {
                     moving.position = Vector3.Lerp(currentPos,
-                                                            new Vector3(moveingOrb.transform.position.x + 0.5f,
-                                                                        moveingOrb.position.y - 0.5f,
+                                                            new Vector3(moveingOrb.transform.position.x + X_OFF_SET,
+                                                                        moveingOrb.position.y + Y_OFF_SET,
                                                                         moveingOrb.transform.position.z),
                                                             1);
                 }

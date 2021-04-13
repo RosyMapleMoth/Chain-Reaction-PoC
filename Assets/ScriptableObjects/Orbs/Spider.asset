@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88b7a3ce3cebea94c9c2856f5ae7054f, type: 3}
   m_Name: Spider
   m_EditorClassIdentifier: 
-  orbColor: {fileID: 0}
-  orbType: 0
+  orbColor: {fileID: 21300000, guid: 64a9f033e44a01445a970b1bc6c0d37b, type: 3}
+  orbType: 6

@@ -1762,7 +1762,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   StartPatt:
-  - {fileID: 11400000, guid: ea03712fe0c17484ab340ae6e7b6015e, type: 2}
+  - {fileID: 11400000, guid: 851c64f45034d1f48a65ad667cacc3ae, type: 2}
   orbPrefab: {fileID: 9078092447020789734, guid: 3526c24fe37d793479ceee665d61f179,
     type: 3}
   orbs: {fileID: 8685713686706373901}
@@ -1781,9 +1781,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: a07614d0508d5254fa50d3e57eb70ac1, type: 3}
   fallenPopConter: -0.25
   PatternList:
-  - {fileID: 11400000, guid: 02b17e9fb7017ca4b8034fdc73ff7e28, type: 2}
-  - {fileID: 11400000, guid: ea03712fe0c17484ab340ae6e7b6015e, type: 2}
-  - {fileID: 11400000, guid: 059500fa3a198eb4c892c07d0b67334c, type: 2}
+  - {fileID: 11400000, guid: 851c64f45034d1f48a65ad667cacc3ae, type: 2}
+  - {fileID: 11400000, guid: 6e1e072cbf4df604da5a45903291d421, type: 2}
   countdown: {fileID: 0}
   StartCountDown: {fileID: 6521963294191206219}
   GrabbedOrbs: {fileID: 8685713686414688402}
