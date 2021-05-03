@@ -15,22 +15,22 @@ using UnityEngine.UI;
  */
 public class GameBoard : MonoBehaviour
 {
-    static private int SPAWN_Y_Val = 7;
-    static private int SPAWN_X_VAL = -4;
-    public const float X_OFF_SET = 0.5f;
-    public const float Y_OFF_SET = -0.5f;
+    public static int SPAWN_Y_Val = 7;
+    public static int SPAWN_X_VAL = -4;
+    public static float X_OFF_SET = 0.5f;
+    public static float Y_OFF_SET = -0.5f;
     public static int ORB_VIEW_LAYER = -3;
-    public static int BOARD_SIZE = 7;
+    public static int BOARD_WIDTH = 7;
+    public static int BOARD_HIGHT = 13;
+
     public GameObject orbPrefab;
     public GameObject phsyicalBoard;
     public Line DEBUGline;
-
     private int orbIDNext = 0;
-
-
     public LinkedList<GameObject>[] board;
     public LinkedList<GameObject>[] incomingLines;
-
+    public Text debug;
+    public bool ContenctRequiresEval;
 
     void Start()
     {
@@ -40,8 +40,19 @@ public class GameBoard : MonoBehaviour
         createLine(DEBUGline);
         createLine(DEBUGline);
         dropLines(3);
+        ContenctRequiresEval = false;
     }
 
+
+    void Update()
+    {
+        updateDebug();
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     public void initGameBoard()
     {
         Debug.Log("Initing Gameaboard");
@@ -57,7 +68,6 @@ public class GameBoard : MonoBehaviour
         }
 
     }
-
 
 
     /// <summary>
@@ -80,6 +90,7 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// adds a specificed numeber of lines to board
     /// </summary>
@@ -98,7 +109,6 @@ public class GameBoard : MonoBehaviour
     }
 
 
-
     /// <summary>
     /// Adds a line from incomingOrbs to board  
     /// </summary>
@@ -112,9 +122,6 @@ public class GameBoard : MonoBehaviour
     }
 
 
-
-
-
     /// <summary>
     /// handles the viewable drop of lines
     /// </summary>
@@ -123,7 +130,6 @@ public class GameBoard : MonoBehaviour
     {
         phsyicalBoard.transform.position = (new Vector3(0f,-linesToDrop,0f) + phsyicalBoard.transform.position);
     }
-
 
 
     /// <summary>
@@ -171,7 +177,6 @@ public class GameBoard : MonoBehaviour
     }
 
 
-
     /// <summary>
     /// places an orb at the end of passed in Col
     /// </summary>
@@ -181,6 +186,7 @@ public class GameBoard : MonoBehaviour
     {
         board[Col].AddLast(orb);
         orb.transform.SetParent(phsyicalBoard.transform);
+        ContenctRequiresEval = true;
     }
 
 
@@ -193,4 +199,73 @@ public class GameBoard : MonoBehaviour
     {
         return board[col].Count;
     }  
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="col"></param>
+    /// <returns></returns>
+    public OrbType GetOrbType(int col)
+    {
+        return board[col].Last.Value.GetComponent<Orb>().orbScript.orbType;
+    }
+
+
+    /// <summary>
+    /// peeks the top orb on any give line
+    /// </summary>
+    /// <param name="col">the line that will be peeked</param>
+    /// <returns>returns a refrence to the orb on the refrenced line</returns>
+    public GameObject peekOrb(int col)
+    {
+        return board[col].Last.Value;
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public Vector3 getRelativeOragin()
+    {
+        return transform.position + new Vector3(SPAWN_X_VAL, SPAWN_Y_Val, 0f);
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void updateDebug()
+    {
+        string temp = ""; 
+
+        for (int i = 0; i < 7; i++)
+        {
+            temp += " col " + i + " |";
+        }
+        temp += "\n";
+        for (int i = 0; i < 7; i++)
+        {
+            temp += "  s " + board[i].Count + "  |";
+        }
+
+        debug.text = temp;
+    }
+
+
+    /// <summary>
+    /// Returns true if contence has been changed in a way that would require an evaluation since last evlauation
+    /// </summary>
+    /// <returns></returns>
+    public bool IsEvalRequired()
+    {
+        return ContenctRequiresEval;
+    }
+
+
+    public void evaluated()
+    {
+        ContenctRequiresEval = false;
+    } 
 }

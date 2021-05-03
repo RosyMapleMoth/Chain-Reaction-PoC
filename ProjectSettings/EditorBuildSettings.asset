@@ -33,5 +33,5 @@ EditorBuildSettings:
     path: Assets/Scenes/multiplayer/Two Player.unity
     guid: 8f0a9a2f4cba24957805104200fffb7d
   m_configObjects:
-    com.unity.input.settings: {fileID: 11400000, guid: 9b30141b26fc9004fad46ff044436543,
+    com.unity.input.settings: {fileID: 11400000, guid: 5ac85f0ce3f1021488906f35b9d8e12f,
       type: 2}
