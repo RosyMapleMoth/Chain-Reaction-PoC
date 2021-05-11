@@ -5,6 +5,8 @@ using UnityEngine;
 public class OrbManipulator : MonoBehaviour
 {
     public GameBoard board;
+
+    public GameStateManger manager;
     public Stack<GameObject> heldOrbs;
     public OrbType curHeldType;
     public Transform GrabbedOrbs;
@@ -39,12 +41,15 @@ public class OrbManipulator : MonoBehaviour
                 curHeldType = board.GetOrbType(col);
                 heldOrbs.Push(board.GrabOrb(col));
                 PickUpOrb(heldOrbs.Peek().transform);
+                manager.ManipulatingOrb();
             }
+
+            // this is an if and a while effectivly
             while (board.GetColSize(col) > 0 && board.GetOrbType(col) == curHeldType)
             {
                 heldOrbs.Push(board.GrabOrb(col));
                 PickUpOrb(heldOrbs.Peek().transform);
-
+                manager.ManipulatingOrb();
             }
         }
     }
@@ -130,7 +135,7 @@ public class OrbManipulator : MonoBehaviour
                 float waitTime = 0.25f - 0.01f * board.GetColSize( col ); // set total wait time based on how far 
                 Vector3 startPosition = moving.position;
                 Vector3 endPosition = board.getRelativeOragin() + new Vector3(col, - board.GetColSize(col) - moving.childCount,0f);
-                
+                Debug.Log(endPosition);
                 while (elapsedTime < waitTime)
                 {
 
@@ -162,12 +167,8 @@ public class OrbManipulator : MonoBehaviour
                 }
 
                 
-                while (moving.childCount > 0)
-                {
-                    Debug.Log("placing orb " + moving.GetChild(0).gameObject.name + " is done");
-                    OrbsBeingDropped--;
-                    board.PlaceOrb(moving.GetChild(0).gameObject, col);
-                }
+                manager.RequestPutOrb(col, moving.transform);
+                OrbsBeingDropped = 0;
                 Debug.Log("all dropping orbs are placed");
                 yield return null;
             }
@@ -204,5 +205,6 @@ public class OrbManipulator : MonoBehaviour
     {
         return IsDropAvilable() && IsGrabAvilable();
     }
+
 }
 

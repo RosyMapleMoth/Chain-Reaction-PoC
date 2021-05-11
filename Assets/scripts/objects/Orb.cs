@@ -8,13 +8,19 @@ public class Orb : MonoBehaviour
     public enum OrbState {Grabbed, Resting, Falling, Poping, Evaluating, ToEvaluate, ToPop}
     public OrbState curState = OrbState.Resting;
 
+
+    private bool readyToPop;
+    private bool hasMovedSinceEval;
+
     public Vector3 TargetPos;
 
 
     // Start is called before the first frame update
     void Start()
     {
-         curState = OrbState.Resting;
+        curState = OrbState.Resting;
+        readyToPop = false;
+        hasMovedSinceEval = false;
     }
 
     // Update is called once per frame
@@ -32,6 +38,27 @@ public class Orb : MonoBehaviour
     {
         orbScript = tooSet;
         gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = tooSet.orbColor;
+    }
+
+
+    public void SetReadyToPop()
+    {
+        readyToPop = true;
+    }
+
+    public bool ReadyToPop()
+    {
+        return readyToPop;
+    }
+
+    public void SetOrbMoved(bool input)
+    {
+        hasMovedSinceEval = input;
+    }
+
+    public bool HasOrbMoved()
+    {
+        return hasMovedSinceEval;
     }
 
     public OrbType GetOrbType()

@@ -31,6 +31,8 @@ public class GameBoard : MonoBehaviour
     public LinkedList<GameObject>[] incomingLines;
     public Text debug;
     public bool ContenctRequiresEval;
+    public float timera = 0.5f;
+
 
     void Start()
     {
@@ -41,12 +43,21 @@ public class GameBoard : MonoBehaviour
         createLine(DEBUGline);
         dropLines(3);
         ContenctRequiresEval = false;
+        Application.targetFrameRate = 145;
     }
 
 
     void Update()
     {
-        updateDebug();
+        if (timera > 0)
+        {
+            timera -= Time.deltaTime;
+        }
+        else
+        {
+            updateDebug();
+            timera = 0.5f;
+        }
     }
 
 
@@ -106,6 +117,7 @@ public class GameBoard : MonoBehaviour
             MoveLineToBoard();
         }
         dropLinesAnimation(linesToDrop);
+        
     }
 
 
@@ -140,7 +152,7 @@ public class GameBoard : MonoBehaviour
     /// <returns></returns>
     public GameObject At(int x, int y)
     {
-        Debug.Log("evaluating orb at " + x + " , " + y);
+        //Debug.Log("evaluating orb at " + x + " , " + y);
         try 
         {
             LinkedListNode<GameObject> temp = board[x].First;
@@ -182,11 +194,12 @@ public class GameBoard : MonoBehaviour
     /// </summary>
     /// <param name="orb">The orb to be placed</param>
     /// <param name="Col">The Col to place orb in</param>
-    public void PlaceOrb(GameObject orb, int Col)
+    public Vector2 PlaceOrb(GameObject orb, int Col)
     {
         board[Col].AddLast(orb);
         orb.transform.SetParent(phsyicalBoard.transform);
         ContenctRequiresEval = true;
+        return new Vector2(board[Col].Count-1,Col);
     }
 
 
@@ -238,19 +251,76 @@ public class GameBoard : MonoBehaviour
     /// </summary>
     private void updateDebug()
     {
-        string temp = ""; 
+        string temp = "|"; 
+
+
 
         for (int i = 0; i < 7; i++)
         {
-            temp += " col " + i + " |";
+            temp += " r" + i + " |";
         }
-        temp += "\n";
-        for (int i = 0; i < 7; i++)
+        temp += "\n|";
+        for (int r = 0; r < 12; r++)
         {
-            temp += "  s " + board[i].Count + "  |";
+            for (int c = 0;c < 7; c++)
+            {
+                GameObject ok = At(c,r);
+                if (ok != null)
+                {
+                    temp += " "+ ok.GetComponent<Orb>().GetOrbType().ToString().Substring(0,2) + " |";
+                }
+                else
+                {
+                    temp += " Em |";
+                }
+            }
+            temp += "\n|";
         }
 
         debug.text = temp;
+    }
+
+
+    public void StartPoppingAllReadyOrbs()
+    {
+        foreach (LinkedList<GameObject> Col in board) 
+        {
+            foreach (GameObject orb in Col) 
+            {
+                Debug.Log("Checking orb " + orb.name + " of type"); 
+                Orb temporb = orb.GetComponent<Orb>();
+                Debug.Log("Checking orb " + orb.name + " in state " + temporb.curState); 
+                if (temporb.ReadyToPop())
+                {
+                    Debug.unityLogger.Log("Start Orb Pop", temporb + " has begun To Pop");
+                    orb.GetComponentInChildren<Animator>().SetTrigger("pop");
+                    temporb.curState = Orb.OrbState.Poping;
+                }
+            } 
+        }
+    }
+
+    public void endPoppingAllOrbs()
+    {
+        foreach (LinkedList<GameObject> Col in board) 
+        {
+            foreach (GameObject orb in Col) 
+            {
+                Orb temporb = orb.GetComponent<Orb>();
+                if (temporb.curState == Orb.OrbState.Poping)
+                {
+                    Col.Remove(temporb.gameObject);
+                    Destroy(temporb.gameObject);
+                }
+            } 
+        }
+    }
+
+
+
+    public bool OrbsCurrentlyDisplaced()
+    {
+        return false;
     }
 
 

@@ -315,8 +315,7 @@ public class BoardManager : MonoBehaviour
                 Debug.unityLogger.Log("End Orb Pop", "Orb " + temporb.name + " is being checked");
                 if (temporb.curState == Orb.OrbState.Poping)
                 {
-                    Vector3 temp = temporb.GetComponent<Orb>().GetRelPos();
-                    Cols[(int)temp.x].Remove(temporb.gameObject);
+                    Col.Remove(temporb.gameObject);
                     Destroy(temporb.gameObject);
                     Debug.unityLogger.Log("End Orb Pop", "Orb " + temporb.name + " has been Popped");
 
