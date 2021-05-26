@@ -1393,6 +1393,9 @@ MonoBehaviour:
   debug: {fileID: 119294468}
   ContenctRequiresEval: 0
   timera: 4
+  orbManipulator: {fileID: 1311460006}
+  DisplacedOrbs: 0
+  OrbsFalling: 0
 --- !u!4 &1311460004
 Transform:
   m_ObjectHideFlags: 0
@@ -1433,6 +1436,8 @@ MonoBehaviour:
   DEBUGpuased: 0
   popCountDown: 0
   addLineWhenReady: 0
+  CurrentChain: 0
+  dropTime: 0
 --- !u!114 &1311460006
 MonoBehaviour:
   m_ObjectHideFlags: 0

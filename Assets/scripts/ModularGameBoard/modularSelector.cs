@@ -18,9 +18,6 @@ public class modularSelector : MonoBehaviour
     public Vector3 MoveStart;
 
 
-
-
-
     // Start is called before the first frame update
     void Start()
     {

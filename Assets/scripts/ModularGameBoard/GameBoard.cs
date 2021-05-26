@@ -32,7 +32,9 @@ public class GameBoard : MonoBehaviour
     public Text debug;
     public bool ContenctRequiresEval;
     public float timera = 0.5f;
-
+    public OrbManipulator orbManipulator;
+    public bool DisplacedOrbs = false;
+    public int OrbsFalling = 0;
 
     void Start()
     {
@@ -215,7 +217,7 @@ public class GameBoard : MonoBehaviour
 
 
     /// <summary>
-    /// 
+    /// Reeturns Orb Type
     /// </summary>
     /// <param name="col"></param>
     /// <returns></returns>
@@ -237,24 +239,84 @@ public class GameBoard : MonoBehaviour
 
 
     /// <summary>
-    /// 
+    /// Gets the relative origin of this perticular board  
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Vector3 origin of the board</returns>
     public Vector3 getRelativeOragin()
     {
         return transform.position + new Vector3(SPAWN_X_VAL, SPAWN_Y_Val, 0f);
     }
 
 
+
+
+
     /// <summary>
     /// 
+    /// </summary>
+    /// <param name="moving"></param>
+    /// <param name="col"></param>
+    /// <param name="dropTime"></param>
+    public void FallOrb(Transform moving, int col, float dropTime, int depth)
+    {
+        
+        IEnumerator MoveToSpot()
+            {
+                
+                float elapsedTime = 0; // set counter to 0
+                float waitTime = dropTime; // set total wait time based on how far 
+                Vector3 startPosition = moving.position;
+                Vector3 endPosition = new Vector3(SPAWN_X_VAL + col, (SPAWN_Y_Val - 1 - depth), 0f);
+                Debug.Log(endPosition);
+                while (elapsedTime < waitTime)
+                {
+
+
+                    try
+                    {
+                        moving.position = Vector3.Lerp( startPosition, 
+                                                        endPosition,
+                                                        Mathf.Clamp((elapsedTime / waitTime), 0, 1));
+                    }
+                    catch
+                    {
+
+                    }
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+                // Make sure we got there
+                try
+                {
+                    // Snap to proper position if we somehow ended with out hitting the correct position
+                    moving.position = Vector3.Lerp( startPosition, 
+                                                    endPosition,
+                                                    1);
+                }
+                catch
+                {
+                    // TODO add wait timer for a small amount of time before reechecking
+                }
+
+                
+                
+                OrbsFalling = 0;
+                Debug.Log("all dropping orbs are placed");
+                yield return null;
+            }
+
+            StartCoroutine(MoveToSpot());
+    }
+
+
+
+
+    /// <summary>
+    /// Updates a Debug readout that shows the internal state of the board game as text
     /// </summary>
     private void updateDebug()
     {
         string temp = "|"; 
-
-
-
         for (int i = 0; i < 7; i++)
         {
             temp += " r" + i + " |";
@@ -281,6 +343,13 @@ public class GameBoard : MonoBehaviour
     }
 
 
+
+
+
+
+    /// <summary>
+    /// Starts the poping animation and sets orb stat to the popping state for all orbs in the ready to pop state.
+    /// </summary>
     public void StartPoppingAllReadyOrbs()
     {
         foreach (LinkedList<GameObject> Col in board) 
@@ -300,6 +369,10 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Destorys all orbs that are currently in the popping state
+    /// </summary>
     public void endPoppingAllOrbs()
     {
         foreach (LinkedList<GameObject> Col in board) 
@@ -316,11 +389,54 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public void MarkAllDisplacedOrbs()
+    {
+        int colCount = 0;
+        foreach (LinkedList<GameObject> Col in board) 
+        {
+            int rowCount = 0;
+            foreach (GameObject orb in Col) 
+            {
+                Debug.Log("FALLMARK : orb at " + orb.transform.position.y + " is being checked with " + (SPAWN_Y_Val - 1- rowCount));
+                if (orb.transform.position.y != SPAWN_Y_Val - 1 - rowCount)
+                {
+                    Debug.Log("Marking orb " + orb.name + " as falling");
+                    orb.GetComponent<Orb>().curState =  Orb.OrbState.Falling;
+                    FallOrb(orb.transform, colCount, 0.15f, rowCount);
+                    OrbsFalling++;
+                }
+                rowCount++;
+            } 
+            colCount++;
+        }
+    }
+
+
+
+
+     public void FinishAllDroppingOrbs()
+    {
+        foreach (LinkedList<GameObject> Col in board) 
+            {
+                foreach (GameObject orb in Col) 
+                {
+                    Orb temporb = orb.GetComponent<Orb>();
+                    if (temporb.curState == Orb.OrbState.Falling)
+                    {
+                        temporb.curState = Orb.OrbState.Resting;
+                        temporb.GetComponent<Orb>().SetOrbMoved(true);
+                    }
+                } 
+            }
+    }
 
 
     public bool OrbsCurrentlyDisplaced()
     {
-        return false;
+        return OrbsFalling > 0;
     }
 
 

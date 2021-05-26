@@ -10,38 +10,27 @@ public class GameStateManger : MonoBehaviour
     public GameState curState;
     public GameState nextState;
     public enum GameState {idle, addLines, evaluate, initPop, popping, dropping};
-
     private static float POP_TIMER = 1.0f;
     private static float DROP_TIMER_MAX = 6f; 
-
     private static int POP_AT_ORB_COUNT = 3;
     public bool evalWhenReady = false;
-
     private bool grabWhenReady = false;
     private bool putWhenReady = false;
-
-    private bool[,] recentlyMoved;
-    
-    
-
+    private bool[,] recentlyMoved;    
     public Text DEBUGCurState;
     public Text DEBUGNextState;
-
     public bool DEBUGpuased;
     public float popCountDown;
     private int grabCol = 0;
     private int putCol = 0;
     public bool addLineWhenReady = false;
     private Transform PutReuestParent;
-
     private int incomingSend = 1;
-
     private bool OrbBeingMoved = false;
-
     private float linedropTimer = 6; 
-
     public int CurrentChain = 0;
-
+    public float dropTime = 0;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -66,9 +55,9 @@ public class GameStateManger : MonoBehaviour
         }
         else
         {
-            // tick down time until next drop
+            // tick down time until next wrop
             linedropTimer -= Time.deltaTime;
-
+            
             if (linedropTimer <= 0)
             {
                 addLineWhenReady = true;
@@ -103,6 +92,7 @@ public class GameStateManger : MonoBehaviour
         }
     }
 
+    /// 
     void LateUpdate()
     {
         if (curState != nextState)
@@ -163,10 +153,12 @@ public class GameStateManger : MonoBehaviour
         if (popCountDown <= 0)
         { 
             board.endPoppingAllOrbs();
-
+            board.MarkAllDisplacedOrbs();
+        
             if (board.OrbsCurrentlyDisplaced())
             {
                 nextState = GameState.dropping;
+                dropTime = 0.155f;
             }
             else
             {
@@ -178,10 +170,12 @@ public class GameStateManger : MonoBehaviour
 
     private void DropState()
     {
-        bool dropCompleate = true;
-        if (dropCompleate)
+
+        dropTime -= Time.deltaTime;
+        if (dropTime <= 0)
         {
             nextState = GameState.evaluate;
+            board.FinishAllDroppingOrbs();
         }
 
     }
@@ -204,14 +198,27 @@ public class GameStateManger : MonoBehaviour
 
 
 
-    /// get and put Requests
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="col"></param>
     public void RequestGetOrb(int col)
     {
         grabWhenReady = true;
         grabCol = col;
     }
-    
+
+
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="col"></param>
+    /// <param name="parent"></param>
     public void RequestPutOrb(int col, Transform parent)
     {
         putWhenReady = true;
@@ -222,14 +229,17 @@ public class GameStateManger : MonoBehaviour
 
 
 
-    
+    /// <summary>
+    /// 
+    /// </summary>
     private void ResolvePutRequest()
     {
         while (PutReuestParent.childCount > 0)
         {
-            Debug.Log("placing orb " + PutReuestParent.GetChild(0).gameObject.name + " is done");
-            PutReuestParent.GetChild(0).GetComponent<Orb>().SetOrbMoved(true);
-            board.PlaceOrb(PutReuestParent.GetChild(0).gameObject, putCol);
+            Transform curChild = PutReuestParent.GetChild(PutReuestParent.childCount - 1);
+            Debug.Log("placing orb " + curChild.gameObject.name + " is done");
+            curChild.GetComponent<Orb>().SetOrbMoved(true);
+            board.PlaceOrb(curChild.gameObject, putCol);
             putWhenReady = false;
         }
         Debug.Log("all dropping orbs are placed");
@@ -290,7 +300,10 @@ public class GameStateManger : MonoBehaviour
 
 
 
-
+    /// <summary>
+    /// Evaluates the board
+    /// </summary>
+    /// <returns></returns>
     public bool Evaluate()
     {
         bool[,] evalMemo;
@@ -331,7 +344,21 @@ public class GameStateManger : MonoBehaviour
         return OrbsNeedToPop;
     } 
 
-    public bool DFS_Orb_eval(bool[,] evalMemo, Queue<Orb> orbsToSet, int x, int y, OrbType type)
+
+
+
+
+
+    /// <summary>
+    /// Helper function for eval function which uses a DFS to evaluate all orbs
+    /// </summary>
+    /// <param name="evalMemo">array that we use to memeoize our problem</param>
+    /// <param name="orbsToSet">Que of Orbs we will have to change after the eval is resolved</param>
+    /// <param name="x">X value of orb being evaluated</param>
+    /// <param name="y">Y value of orb being evaluated</param>
+    /// <param name="type">Color of orb being evaluated</param>
+    /// <returns>Returns true if current orb is the same type as inital orb, or if current orb has alreadty been evaluated as needing to be changed</returns>
+    private bool DFS_Orb_eval(bool[,] evalMemo, Queue<Orb> orbsToSet, int x, int y, OrbType type)
     {
 
         // if we are out of bounds exit
@@ -369,9 +396,5 @@ public class GameStateManger : MonoBehaviour
 
             return (center || right || down);
         }
-        
-
-
-
     }
 }

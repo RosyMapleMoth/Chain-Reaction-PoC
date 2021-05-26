@@ -115,7 +115,7 @@ public class OrbManipulator : MonoBehaviour
                 temp.transform.localPosition = new Vector3(0,OrbsBeingDropped,0);
                 OrbsBeingDropped++;
             }
-            DropOrb(DroppingOrbs, col);
+            DropOrb(DroppingOrbs, col, 0.25f - 0.01f * board.GetColSize( col ));
         }
     }
 
@@ -125,14 +125,14 @@ public class OrbManipulator : MonoBehaviour
     /// </summary>
     /// <param name="moving"></param>
     /// <param name="col"></param>
-    private void DropOrb(Transform moving, int col)
+    public void DropOrb(Transform moving, int col, float dropTime)
     {
         
         IEnumerator MoveToSpot()
             {
                 
                 float elapsedTime = 0; // set counter to 0
-                float waitTime = 0.25f - 0.01f * board.GetColSize( col ); // set total wait time based on how far 
+                float waitTime = dropTime; // set total wait time based on how far 
                 Vector3 startPosition = moving.position;
                 Vector3 endPosition = board.getRelativeOragin() + new Vector3(col, - board.GetColSize(col) - moving.childCount,0f);
                 Debug.Log(endPosition);
