@@ -35,7 +35,7 @@ public class GameStateManger : MonoBehaviour
     void Start()
     {
         curState = GameState.idle;
-        nextState =GameState.idle;
+        nextState = GameState.idle;
         recentlyMoved = new bool[GameBoard.BOARD_HIGHT,GameBoard.BOARD_WIDTH];
     }
 
@@ -66,8 +66,9 @@ public class GameStateManger : MonoBehaviour
             // if a grab was requested grab
             if (grabWhenReady)
             {
+                OrbBeingMoved = true;
+                grabWhenReady = false;
                 orbTransport.AttmeptGrabOrbs(grabCol);
-                OrbBeingMoved = false;
             }
 
             // if a put was attempted put it
@@ -213,7 +214,6 @@ public class GameStateManger : MonoBehaviour
 
 
 
-
     /// <summary>
     /// 
     /// </summary>
@@ -284,6 +284,7 @@ public class GameStateManger : MonoBehaviour
 
 
     public bool CanManipulateOrb()
+    
     {
         return (!OrbBeingMoved);
     }
@@ -293,9 +294,10 @@ public class GameStateManger : MonoBehaviour
         OrbBeingMoved = true;
     }
 
-
-
-
+    public void FinishManipulatingOrb()
+    {
+        OrbBeingMoved = false;
+    }
 
 
 
@@ -391,10 +393,12 @@ public class GameStateManger : MonoBehaviour
             bool center = myOrb.HasOrbMoved();
             myOrb.SetOrbMoved(false);
 
-            bool right = DFS_Orb_eval(evalMemo, orbsToSet, x+1, y, type);
-            bool down = DFS_Orb_eval(evalMemo, orbsToSet, x, y+1, type);;
+            bool right = DFS_Orb_eval(evalMemo, orbsToSet, x + 1, y, type);
+            bool down = DFS_Orb_eval(evalMemo, orbsToSet, x, y + 1, type);
+            bool up = DFS_Orb_eval(evalMemo, orbsToSet, x - 1, y, type);
+            bool left = DFS_Orb_eval(evalMemo, orbsToSet, x, y - 1, type);
 
-            return (center || right || down);
+            return (center || right || down || up || left);
         }
     }
 }

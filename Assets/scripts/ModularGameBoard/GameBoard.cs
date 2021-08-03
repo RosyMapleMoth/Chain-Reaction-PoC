@@ -16,9 +16,9 @@ using UnityEngine.UI;
 public class GameBoard : MonoBehaviour
 {
     public static int SPAWN_Y_Val = 7;
-    public static int SPAWN_X_VAL = -4;
-    public static float X_OFF_SET = 0.5f;
-    public static float Y_OFF_SET = -0.5f;
+    public static float SPAWN_X_VAL = -4;
+    public static float X_OFF_SET = 0.1250f;
+    public static float Y_OFF_SET = 0.1250f;
     public static int ORB_VIEW_LAYER = -3;
     public static int BOARD_WIDTH = 7;
     public static int BOARD_HIGHT = 13;
@@ -40,10 +40,7 @@ public class GameBoard : MonoBehaviour
     {
         Debug.Log("WuW");
         initGameBoard();
-        createLine(DEBUGline);
-        createLine(DEBUGline);
-        createLine(DEBUGline);
-        dropLines(3);
+        dropLines(6);
         ContenctRequiresEval = false;
         Application.targetFrameRate = 145;
     }
@@ -62,6 +59,20 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+
+
+
+
+    public float GetRelativeSpawnX()
+    {
+        return SPAWN_X_VAL + transform.position.x - X_OFF_SET;
+    }
+
+
+    public float GetRelativeSpawnY()
+    {
+        return SPAWN_Y_Val + transform.position.y - Y_OFF_SET;
+    }
 
     /// <summary>
     /// 
@@ -93,7 +104,10 @@ public class GameBoard : MonoBehaviour
         {
             GameObject temp;
 
-            temp = Instantiate(orbPrefab, new Vector3(transform.position.x + SPAWN_X_VAL + i, transform.position.y + SPAWN_Y_Val +  incomingLines[i].Count, ORB_VIEW_LAYER), Quaternion.identity);
+            temp = Instantiate(orbPrefab, new Vector3(GetRelativeSpawnX() + i + (X_OFF_SET * i),
+                                                      GetRelativeSpawnY() + (incomingLines[i].Count * Y_OFF_SET) + (incomingLines[i].Count * 1),
+                                                      ORB_VIEW_LAYER),
+                                                      Quaternion.identity);
             temp.name = "orb " + orbIDNext.ToString();
             temp.transform.GetChild(1).GetComponentInChildren<Text>().text = temp.name;
             orbIDNext = orbIDNext+1;
@@ -142,7 +156,7 @@ public class GameBoard : MonoBehaviour
     /// <param name="linesToDrop">number of lines to drop </param>
     private void dropLinesAnimation(int linesToDrop)
     {
-        phsyicalBoard.transform.position = (new Vector3(0f,-linesToDrop,0f) + phsyicalBoard.transform.position);
+        phsyicalBoard.transform.position = (new Vector3(0f,-linesToDrop - (linesToDrop*Y_OFF_SET),0f) + phsyicalBoard.transform.position);
     }
 
 
@@ -182,6 +196,7 @@ public class GameBoard : MonoBehaviour
         GameObject orb = board[Col].Last.Value;
         
         // remove orb from boarded orbs and data structure 
+        orb.GetComponent<Orb>().curState = Orb.OrbState.Resting;
         orb.transform.SetParent(null);
         board[Col].RemoveLast();
 
@@ -244,7 +259,7 @@ public class GameBoard : MonoBehaviour
     /// <returns>Vector3 origin of the board</returns>
     public Vector3 getRelativeOragin()
     {
-        return transform.position + new Vector3(SPAWN_X_VAL, SPAWN_Y_Val, 0f);
+        return transform.position + new Vector3(SPAWN_X_VAL, SPAWN_Y_Val - Y_OFF_SET, 0f);
     }
 
 
@@ -266,7 +281,7 @@ public class GameBoard : MonoBehaviour
                 float elapsedTime = 0; // set counter to 0
                 float waitTime = dropTime; // set total wait time based on how far 
                 Vector3 startPosition = moving.position;
-                Vector3 endPosition = new Vector3(SPAWN_X_VAL + col, (SPAWN_Y_Val - 1 - depth), 0f);
+                Vector3 endPosition = new Vector3( SPAWN_X_VAL + col + (X_OFF_SET * col ), (SPAWN_Y_Val - 1.125f - depth - (Y_OFF_SET * depth)), 0f);
                 Debug.Log(endPosition);
                 while (elapsedTime < waitTime)
                 {
@@ -304,12 +319,15 @@ public class GameBoard : MonoBehaviour
                 Debug.Log("all dropping orbs are placed");
                 yield return null;
             }
-
             StartCoroutine(MoveToSpot());
     }
 
 
 
+    public bool CanPickUp(int col)
+    {
+        return board[col].Last.Value.GetComponent<Orb>().curState != Orb.OrbState.ToPop && board[col].Last.Value.GetComponent<Orb>().curState != Orb.OrbState.Poping && board[col].Last.Value.GetComponent<Orb>().curState != Orb.OrbState.Evaluating;
+    }
 
     /// <summary>
     /// Updates a Debug readout that shows the internal state of the board game as text
@@ -401,7 +419,7 @@ public class GameBoard : MonoBehaviour
             foreach (GameObject orb in Col) 
             {
                 Debug.Log("FALLMARK : orb at " + orb.transform.position.y + " is being checked with " + (SPAWN_Y_Val - 1- rowCount));
-                if (orb.transform.position.y != SPAWN_Y_Val - 1 - rowCount)
+                if (orb.transform.position.y != SPAWN_Y_Val - (1+ Y_OFF_SET) - rowCount -(Y_OFF_SET*rowCount))
                 {
                     Debug.Log("Marking orb " + orb.name + " as falling");
                     orb.GetComponent<Orb>().curState =  Orb.OrbState.Falling;
@@ -454,4 +472,11 @@ public class GameBoard : MonoBehaviour
     {
         ContenctRequiresEval = false;
     } 
+
+
+
+    public Vector3 getRelativeDropPoint(int col)
+    {
+        return getRelativeOragin() + new Vector3(col + (GameBoard.X_OFF_SET * col), -GetColSize(col) - (GameBoard.Y_OFF_SET * col),0f);
+    }
 }

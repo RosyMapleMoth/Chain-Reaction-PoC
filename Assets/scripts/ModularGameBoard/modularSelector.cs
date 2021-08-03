@@ -11,16 +11,20 @@ public class modularSelector : MonoBehaviour
     static int MIN_BOARD_SIZE = 0;
     static int MAX_BOARD_SIZE = 6;
     public OrbManipulator gameMng;
+
+    public GameStateManger stateManger;
     public float elapsedTime = 0.00f;
     public bool moving;
     public Vector3 MoveTarget;
     public Vector3 Ancor;
     public Vector3 MoveStart;
 
+    public (int col, string PickUp, float timer) pickUpQue;
 
     // Start is called before the first frame update
     void Start()
     {
+        pickUpQue = (-1, "", -1);
         Ancor = transform.position;
         moving = false;
     }
@@ -36,6 +40,7 @@ public class modularSelector : MonoBehaviour
     {
         
         playingUpdate();
+
     }
 
 
@@ -44,11 +49,34 @@ public class modularSelector : MonoBehaviour
 
         if (gameMng.board.GetColSize(GetCurCol()) > 0)
         {
-            selectLine.SetPosition(0, new Vector3(selectLine.GetPosition(0).x, gameMng.board.getRelativeOragin().y - gameMng.board.GetColSize(GetCurCol()) - 1, selectLine.GetPosition(0).z));
+            selectLine.SetPosition(0, new Vector3(selectLine.GetPosition(0).x, gameMng.board.getRelativeOragin().y - (1.125f)*gameMng.board.GetColSize(GetCurCol()) - 1, selectLine.GetPosition(0).z));
         }
         else
         {
-            selectLine.SetPosition(0, new Vector3(selectLine.GetPosition(0).x, 6, selectLine.GetPosition(0).z));
+            selectLine.SetPosition(0, new Vector3(selectLine.GetPosition(0).x, 6 - GameBoard.Y_OFF_SET*2, selectLine.GetPosition(0).z));
+        }
+        if (gameMng.OrbsBeingPickedUp > 0 || gameMng.OrbsBeingDropped > 0)
+        {
+            if (pickUpQue.col != -1)
+            {
+                if (pickUpQue.PickUp == "Up")
+                {
+                    stateManger.RequestGetOrb(pickUpQue.col);
+                }
+                else
+                {
+                    gameMng.AttemptDropOrbs(pickUpQue.col);
+                }
+            }
+        }
+        if (pickUpQue.timer > 0)
+        {
+            pickUpQue.timer -= Time.deltaTime;
+
+        }
+        else
+        {
+            pickUpQue = (-1, "None", -1);
         }
 
 
@@ -61,14 +89,14 @@ public class modularSelector : MonoBehaviour
                 transform.position = Vector3.Lerp(MoveStart, MoveTarget, (elapsedTime / MOVE_TIME));
                 if (gameMng.board.GetColSize(GetCurCol()) > 0)
                 {
-                    selectLine.SetPosition(0, new Vector3(1.2f+transform.position.x - gameMng.transform.position.x, gameMng.board.getRelativeOragin().y - gameMng.board.GetColSize(GetCurCol())- 1, selectLine.GetPosition(0).z));
-                    selectLine.SetPosition(1, new Vector3(1.2f+transform.position.x - gameMng.transform.position.x, selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
+                    selectLine.SetPosition(0, new Vector3(transform.position.x - gameMng.transform.position.x, gameMng.board.getRelativeOragin().y - gameMng.board.GetColSize(GetCurCol())- 1, selectLine.GetPosition(0).z));
+                    selectLine.SetPosition(1, new Vector3(transform.position.x - gameMng.transform.position.x, selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
 
                 }
                 else
                 {
-                    selectLine.SetPosition(0, new Vector3(1.2f+transform.position.x - gameMng.transform.position.x, 6, selectLine.GetPosition(0).z));
-                    selectLine.SetPosition(1, new Vector3(1.2f+transform.position.x - gameMng.transform.position.x, selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
+                    selectLine.SetPosition(0, new Vector3(transform.position.x - gameMng.transform.position.x, 6, selectLine.GetPosition(0).z));
+                    selectLine.SetPosition(1, new Vector3(transform.position.x - gameMng.transform.position.x, selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
                 }
             }
             else
@@ -81,9 +109,13 @@ public class modularSelector : MonoBehaviour
 
     public void OnDrop()
     {
-        if (/*gameMng.isInState(GameStateManger.GameState.playing) &&*/ gameMng.CanAct())
+        if (/*gameMng.isInState(GameStateManger.GameState.playing) &&*/ gameMng.CanAct()  && gameMng.heldOrbs.Count > 0)
         {
             gameMng.AttemptDropOrbs(GetCurCol());
+        }
+        else if (gameMng.OrbsBeingPickedUp > 0 || gameMng.OrbsBeingDropped > 0)
+        {
+            pickUpQue = (GetCurCol(),"Drop",0.5f);
         }
     }
 
@@ -91,7 +123,12 @@ public class modularSelector : MonoBehaviour
     {
         if (/*gameMng.isInState(GameStateManger.GameState.playing) && */ gameMng.CanAct())
         {
-            gameMng.AttmeptGrabOrbs(GetCurCol());
+            stateManger.RequestGetOrb(GetCurCol());
+        }
+        else if (gameMng.OrbsBeingPickedUp > 0 || gameMng.OrbsBeingDropped > 0)
+        {
+            pickUpQue = (GetCurCol(),"Up",0.05f);
+
         }
     }
 
@@ -118,7 +155,7 @@ public class modularSelector : MonoBehaviour
             
             // set movement start and end positions
             MoveStart = transform.position;
-            MoveTarget = new Vector3(transform.position.x - 1, transform.position.y, transform.position.z);
+            MoveTarget = new Vector3(transform.position.x - 1.125f, transform.position.y, transform.position.z);
 
             // set up move helper to be active
             moving = true;
@@ -149,7 +186,7 @@ public class modularSelector : MonoBehaviour
         }
 
         MoveStart = transform.position;
-        MoveTarget = new Vector3(transform.position.x + 1, transform.position.y, transform.position.z);
+        MoveTarget = new Vector3(transform.position.x + 1.125f, transform.position.y, transform.position.z);
         moving = true;
         elapsedTime = 0.00f;
 
