@@ -315,8 +315,7 @@ public class BoardManager : MonoBehaviour
                 Debug.unityLogger.Log("End Orb Pop", "Orb " + temporb.name + " is being checked");
                 if (temporb.curState == Orb.OrbState.Poping)
                 {
-                    Vector3 temp = temporb.GetComponent<Orb>().GetRelPos();
-                    Cols[(int)temp.x].Remove(temporb.gameObject);
+                    Col.Remove(temporb.gameObject);
                     Destroy(temporb.gameObject);
                     Debug.unityLogger.Log("End Orb Pop", "Orb " + temporb.name + " has been Popped");
 
@@ -716,7 +715,7 @@ public class BoardManager : MonoBehaviour
                                          OobCols[(int)Mathf.Floor(moving.localPosition.x)].Last.Value.transform.position.y - 13,
                                          moving.position.z);
             float elapsedTime = 0f, waitTime = 0.20f - 0.01f*Cols[(int)Mathf.Floor(moving.localPosition.x)].Count;
-            orb.transform.SetParent(GrabbedOrbs);
+            moving.SetParent(GrabbedOrbs);
             HeldObrs++;
 
             
@@ -727,7 +726,7 @@ public class BoardManager : MonoBehaviour
             {
                 try
                 {
-                    orb.transform.position = Vector3.Lerp(currentPos,
+                    moving.position = Vector3.Lerp(currentPos,
                                                         EndPos,
                                                         Mathf.Clamp((elapsedTime / waitTime), 0, 1));
                 }
@@ -738,7 +737,7 @@ public class BoardManager : MonoBehaviour
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-            orb.transform.localPosition = new Vector3(0F, HeldObrs, 0F);
+            moving.localPosition = new Vector3(0F, HeldObrs, 0F);
             OrbsBeingGrabed--;
             yield return null;
         }

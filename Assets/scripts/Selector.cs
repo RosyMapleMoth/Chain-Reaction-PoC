@@ -25,8 +25,7 @@ public class Selector : MonoBehaviour
 
     public KeyCode Playerleft, Playerright, Playerup, Playerdown, PlayerPick, PlayerDrop;
 
-
-
+    
 
     // Start is called before the first frame update
     void Start()
@@ -81,7 +80,6 @@ public class Selector : MonoBehaviour
                 {
                     selectLine.SetPosition(0, new Vector3(1.2f+transform.position.x - gameMng.transform.position.x, gameMng.Cols[GetCurCol()].Last.Value.transform.position.y - 0.9f, selectLine.GetPosition(0).z));
                     selectLine.SetPosition(1, new Vector3(1.2f+transform.position.x - gameMng.transform.position.x, selectLine.GetPosition(1).y, selectLine.GetPosition(1).z));
-
                 }
                 else
                 {
