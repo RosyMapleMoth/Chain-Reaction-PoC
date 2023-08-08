@@ -26,7 +26,7 @@ public class GameStateManger : MonoBehaviour
     public bool addLineWhenReady = false;
     private Transform PutReuestParent;
     private int incomingSend = 1;
-    private bool OrbBeingMoved = false;
+    public bool OrbBeingMoved = false;
     private float linedropTimer = 6; 
     public int CurrentChain = 0;
     public float dropTime = 0;
@@ -66,7 +66,7 @@ public class GameStateManger : MonoBehaviour
             // if a grab was requested grab
             if (grabWhenReady)
             {
-                OrbBeingMoved = true;
+                //OrbBeingMoved = true;
                 grabWhenReady = false;
                 orbTransport.AttmeptGrabOrbs(grabCol);
             }
@@ -75,8 +75,9 @@ public class GameStateManger : MonoBehaviour
             if (putWhenReady)
             {
                 ResolvePutRequest();
-                OrbBeingMoved = false;
+                //OrbBeingMoved = false;
                 evalWhenReady = true;
+                FinishManipulatingOrb();
             }
             
             // run current state

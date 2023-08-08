@@ -1,9 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class score : MonoBehaviour
+public class scoreTMP : MonoBehaviour
 {
 
     private int ScoreVal = 0; 
@@ -18,10 +18,10 @@ public class score : MonoBehaviour
     //basic score gained form popoing a block
     private const int BaseBlockVal = 100;
 
-    public Text Score;
-    public Text addedScore;
+    public TextMeshProUGUI Score;
+    public TextMeshProUGUI addedScore;
 
-    public Text Chain; 
+    public TextMeshProUGUI Chain; 
     // Start is called before the first frame update
     void Start()
     {
@@ -104,3 +104,4 @@ public class score : MonoBehaviour
     }
 
 }
+

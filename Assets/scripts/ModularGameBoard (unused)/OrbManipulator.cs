@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class OrbManipulator : MonoBehaviour
 {
     public GameBoard board;
-
+    public UnityEvent DroppingOrbsEvt;
     public GameStateManger manager;
     public Stack<GameObject> heldOrbs;
     public OrbType curHeldType;
@@ -34,7 +35,7 @@ public class OrbManipulator : MonoBehaviour
     /// <param name="col"></param>
     public void AttmeptGrabOrbs(int col)
     {
-        if (board.GetColSize(col) > 0)
+        if (board.GetColSize(col) > 0 && manager.CanManipulateOrb())
         {
             if (heldOrbs.Count == 0 && board.CanPickUp(col))
             {
@@ -71,11 +72,16 @@ public class OrbManipulator : MonoBehaviour
         Debug.Log("Jumping orb from " + currentPos + " to " +EndPos );
         float elapsedTime = 0f, waitTime = 0.20f - 0.01f * (GameBoard.SPAWN_Y_Val - moving.position.y);
         moving.SetParent(GrabbedOrbs);
-
-
+        bool earlyEnd = false;
+        void earlyEndInvoke()
+        {
+            earlyEnd = true;
+        }
         IEnumerator PickUp()
         {
-            while (elapsedTime <= waitTime)
+            DroppingOrbsEvt.AddListener(earlyEndInvoke);
+
+            while (elapsedTime <= waitTime && earlyEnd == false)
             {
                 try
                 {
@@ -90,13 +96,16 @@ public class OrbManipulator : MonoBehaviour
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-            
+            DroppingOrbsEvt.RemoveListener(earlyEndInvoke);
             OrbsBeingPickedUp--;
-            if (OrbsBeingPickedUp == 0)
+            if (OrbsBeingPickedUp <= 0 && earlyEnd == false)
             {
                 manager.FinishManipulatingOrb();
             }
-            moving.transform.localPosition = new Vector3(0F, heldOrbs.Count, 0F);
+            if (earlyEnd == false)
+            {
+                moving.transform.localPosition = new Vector3(0F, heldOrbs.Count, 0F);
+            }
             yield return null;
         }
     StartCoroutine(PickUp());
@@ -111,7 +120,9 @@ public class OrbManipulator : MonoBehaviour
     {
         if (heldOrbs.Count > 0)
         {
-            DroppingOrbs.position = board.getRelativeOragin() + new Vector3(col + col*GameBoard.X_OFF_SET, -GameBoard.BOARD_HIGHT,0f);
+            manager.ManipulatingOrb();
+            DroppingOrbsEvt.Invoke();
+            DroppingOrbs.position = board.getRelativeOragin() + new Vector3(col + col*GameBoard.X_OFF_SET, -GameBoard.BOARD_HIGHT-3,0f);
             while (heldOrbs.Count > 0)
             {
                 GameObject temp = heldOrbs.Pop();
@@ -137,7 +148,7 @@ public class OrbManipulator : MonoBehaviour
                 float elapsedTime = 0; // set counter to 0
                 float waitTime = dropTime; // set total wait time based on how far 
                 Vector3 startPosition = moving.position;
-                Vector3 endPosition = board.getRelativeOragin() +new Vector3(col + (GameBoard.X_OFF_SET), - board.GetColSize(col) - moving.childCount,0f);
+                Vector3 endPosition = board.getRelativeOragin() + new Vector3(col + (GameBoard.X_OFF_SET), - board.GetColSize(col) - moving.childCount,0f);
                 Debug.Log(endPosition);
                 while (elapsedTime < waitTime)
                 {
@@ -176,6 +187,10 @@ public class OrbManipulator : MonoBehaviour
                 
                 manager.RequestPutOrb(col, moving.transform);
                 OrbsBeingDropped = 0;
+                if (OrbsBeingDropped == 0)
+                {
+                    
+                }
                 Debug.Log("all dropping orbs are placed");
                 yield return null;
             }

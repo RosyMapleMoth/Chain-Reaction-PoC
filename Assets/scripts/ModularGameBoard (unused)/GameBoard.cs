@@ -40,7 +40,7 @@ public class GameBoard : MonoBehaviour
     {
         Debug.Log("WuW");
         initGameBoard();
-        dropLines(6);
+        dropLines(2);
         ContenctRequiresEval = false;
         Application.targetFrameRate = 145;
     }
@@ -259,7 +259,7 @@ public class GameBoard : MonoBehaviour
     /// <returns>Vector3 origin of the board</returns>
     public Vector3 getRelativeOragin()
     {
-        return transform.position + new Vector3(SPAWN_X_VAL, SPAWN_Y_Val - Y_OFF_SET, 0f);
+        return transform.position + new Vector3(SPAWN_X_VAL - X_OFF_SET, SPAWN_Y_Val - Y_OFF_SET, 0f);
     }
 
 
@@ -281,7 +281,7 @@ public class GameBoard : MonoBehaviour
                 float elapsedTime = 0; // set counter to 0
                 float waitTime = dropTime; // set total wait time based on how far 
                 Vector3 startPosition = moving.position;
-                Vector3 endPosition = new Vector3( SPAWN_X_VAL + col + (X_OFF_SET * col ), (SPAWN_Y_Val - 1.125f - depth - (Y_OFF_SET * depth)), 0f);
+                Vector3 endPosition = new Vector3(SPAWN_X_VAL + (X_OFF_SET*(col-1)) + col, (SPAWN_Y_Val - 1.30f - depth - (Y_OFF_SET * depth)), 0f);
                 Debug.Log(endPosition);
                 while (elapsedTime < waitTime)
                 {
@@ -393,6 +393,7 @@ public class GameBoard : MonoBehaviour
     /// </summary>
     public void endPoppingAllOrbs()
     {
+        Queue<GameObject> orbsToRemove = new Queue<GameObject>();
         foreach (LinkedList<GameObject> Col in board) 
         {
             foreach (GameObject orb in Col) 
@@ -400,10 +401,14 @@ public class GameBoard : MonoBehaviour
                 Orb temporb = orb.GetComponent<Orb>();
                 if (temporb.curState == Orb.OrbState.Poping)
                 {
-                    Col.Remove(temporb.gameObject);
-                    Destroy(temporb.gameObject);
+                    orbsToRemove.Enqueue(orb);
                 }
-            } 
+            }
+            while (orbsToRemove.Count > 0)
+            {
+                Col.Remove(orbsToRemove.Peek());
+                Destroy(orbsToRemove.Dequeue());
+            }  
         }
     }
 
@@ -412,30 +417,47 @@ public class GameBoard : MonoBehaviour
     /// </summary>
     public void MarkAllDisplacedOrbs()
     {
-        int colCount = 0;
-        foreach (LinkedList<GameObject> Col in board) 
+        for (int i = 0; i < BOARD_WIDTH; i++)
         {
-            int rowCount = 0;
-            foreach (GameObject orb in Col) 
+            LinkedListNode<GameObject> node = board[i].First;
+            if (node != null)
             {
-                Debug.Log("FALLMARK : orb at " + orb.transform.position.y + " is being checked with " + (SPAWN_Y_Val - 1- rowCount));
-                if (orb.transform.position.y != SPAWN_Y_Val - (1+ Y_OFF_SET) - rowCount -(Y_OFF_SET*rowCount))
+                int depth = 0;
+                if (checkNode(node.Value.transform.position, new Vector3(0,phsyicalBoard.transform.position.y,0),depth))
                 {
-                    Debug.Log("Marking orb " + orb.name + " as falling");
-                    orb.GetComponent<Orb>().curState =  Orb.OrbState.Falling;
-                    FallOrb(orb.transform, colCount, 0.15f, rowCount);
+                    Debug.Log("FALLMARK : Marking orb " + node.Value.name + " as falling");
+                    node.Value.GetComponent<Orb>().curState =  Orb.OrbState.Falling;
+                    FallOrb(node.Value.transform, i, 0.15f, depth);
                     OrbsFalling++;
                 }
-                rowCount++;
-            } 
-            colCount++;
+
+
+                while (node.Next != null)
+                {
+                    depth++;
+                    node = node.Next;
+                    if (checkNode(node.Value.transform.position, node.Previous.Value.transform.position,depth))
+                    {
+                        Debug.Log("FALLMARK : Marking orb " + node.Value.name + " as falling");
+                        node.Value.GetComponent<Orb>().curState =  Orb.OrbState.Falling;
+                        FallOrb(node.Value.transform, i, 0.15f, depth);
+                        OrbsFalling++;
+                    }
+                }
+            }
         }
     }
 
+    public bool checkNode(Vector3 node, Vector3 ancor, int depth)
+    {
+        Debug.Log("FALLMARK : orb at " + node.y + " is being checked with " + ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth ) - 1.375) + " for dif of " + (node.y - ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth)-1.375)));
+        Debug.Log("FALLMARK" + (node.y - ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth ) - 1.375) != 0));
+        return (node.y != ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth ) - 1.375));
+        
+    }
 
 
-
-     public void FinishAllDroppingOrbs()
+    public void FinishAllDroppingOrbs()
     {
         foreach (LinkedList<GameObject> Col in board) 
             {

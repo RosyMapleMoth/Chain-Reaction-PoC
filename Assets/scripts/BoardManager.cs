@@ -53,7 +53,7 @@ public class BoardManager : MonoBehaviour
     public enum GameState {starting,puase,playing,over};
     public float StartingUp;
     public bool isGameOver = false;
-    public score playerScore;
+    public scoreTMP playerScore;
 
     // This keeps track of orbs currently being grabbed,
     // we should not be able to shoot orbs until Orbs Beinggrabed is zero
@@ -616,7 +616,7 @@ public class BoardManager : MonoBehaviour
            
 
             Transform moveingOrb = GrabbedOrbs.GetChild(GrabbedOrbs.childCount-1);
-             Debug.Log("Dropping " +  GrabbedOrbs.GetChild(GrabbedOrbs.childCount-1).ToString());
+            Debug.Log("Dropping " +  GrabbedOrbs.GetChild(GrabbedOrbs.childCount-1).ToString());
             Vector3 start = moveingOrb.position;
             moveingOrb.position = new Vector3(ancorOrb.transform.position.x, ancorOrb.transform.position.y - 1, ORB_VIEW_LAYER);
             moveingOrb.GetChild(0).position = start;
