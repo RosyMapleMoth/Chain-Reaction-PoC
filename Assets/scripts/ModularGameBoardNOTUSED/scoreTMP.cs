@@ -8,7 +8,7 @@ public class scoreTMP : MonoBehaviour
 
     private int ScoreVal = 0; 
     private int incomingChange = 0;
-    private int multiplyer = 1;
+    private int multiplyer = 100;
     private int chain = 0;
 
     public int level = 1;
@@ -22,6 +22,8 @@ public class scoreTMP : MonoBehaviour
     public TextMeshProUGUI addedScore;
 
     public TextMeshProUGUI Chain; 
+    public TextMeshProUGUI levelTMP;
+    public float timeSinceLastScore;
     // Start is called before the first frame update
     void Start()
     {
@@ -32,12 +34,15 @@ public class scoreTMP : MonoBehaviour
     void Update()
     {
         updateScoreView();
+        timeSinceLastScore += Time.deltaTime;
+        addedScore.alpha = 1.5f - (timeSinceLastScore);
+        addedScore.transform.localScale = new Vector3(1.5f - (timeSinceLastScore), 1.5f - (timeSinceLastScore), 1.5f - (timeSinceLastScore));
     }
 
 
     public void resetChain()
     {
-        chain = 0;
+        chain = 1;
     }
 
     public void incressChain()
@@ -50,6 +55,12 @@ public class scoreTMP : MonoBehaviour
         return chain;
     }
 
+    public void scoreBlock(int SizeOfBlock)
+    {
+        incomingChange += SizeOfBlock * (chain) * multiplyer;
+        Debug.Log("Score : adding " + SizeOfBlock * chain * multiplyer + " To player score");
+        incressChain();
+    }
 
     public void scoreBlock()
     {
@@ -71,14 +82,18 @@ public class scoreTMP : MonoBehaviour
 
     public void finializePop()
     {
-
+        timeSinceLastScore = 0;
         ScoreVal += incomingChange;
-        addedScore.text = incomingChange.ToString();
-        Chain.text = (chain + 1).ToString();
+        addedScore.text = "+" + incomingChange.ToString();
+        Chain.text = (chain-1).ToString();
 
         if (ScoreVal > level * xpRequirement)
         {
-            level++;
+            while (ScoreVal - (level-1) * xpRequirement > level * xpRequirement)
+            {
+                level++; 
+                levelTMP.text = level.ToString();
+            }
         }
 
         incomingChange = 0;

@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +9,17 @@ public class GameStateManger : MonoBehaviour
 {
     public GameBoard board;
     public OrbManipulator orbTransport;
+    
+    public scoreTMP score;
+    public bool DebugMode;
+    public Animator GameOverScreen;
+    public Animator dropArrow;
+
+
     public GameState curState;
     public GameState nextState;
-    public enum GameState {idle, addLines, evaluate, initPop, popping, dropping};
+    public TextMeshProUGUI maxtime;
+    public enum GameState {idle, addLines, evaluate, initPop, popping, dropping, EndingGame, GameOver};
     private static float POP_TIMER = 1.0f;
     private static float DROP_TIMER_MAX = 6f; 
     private static int POP_AT_ORB_COUNT = 3;
@@ -24,11 +34,11 @@ public class GameStateManger : MonoBehaviour
     private int grabCol = 0;
     private int putCol = 0;
     public bool addLineWhenReady = false;
+    public float LinesToAdd = 0;
     private Transform PutReuestParent;
     private int incomingSend = 1;
     public bool OrbBeingMoved = false;
     private float linedropTimer = 6; 
-    public int CurrentChain = 0;
     public float dropTime = 0;
     
     // Start is called before the first frame update
@@ -39,7 +49,10 @@ public class GameStateManger : MonoBehaviour
         recentlyMoved = new bool[GameBoard.BOARD_HIGHT,GameBoard.BOARD_WIDTH];
     }
 
-
+    public GameState GetState()
+    {
+        return curState;
+    }
 
 
 
@@ -48,7 +61,10 @@ public class GameStateManger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        DEBUGstatWatcher();
+        if (DebugMode)
+        {
+            DEBUGstatWatcher();
+        }
         if (DEBUGpuased)
         {
 
@@ -57,14 +73,19 @@ public class GameStateManger : MonoBehaviour
         {
             // tick down time until next wrop
             linedropTimer -= Time.deltaTime;
-            
+            if (linedropTimer <= 2.30 && linedropTimer > 0)
+            {
+                
+                dropArrow.SetBool("Switching", true);
+                
+            }
             if (linedropTimer <= 0)
             {
                 addLineWhenReady = true;
             }
             
             // if a grab was requested grab
-            if (grabWhenReady)
+            if (grabWhenReady && curState != GameState.evaluate && nextState != GameState.evaluate)
             {
                 //OrbBeingMoved = true;
                 grabWhenReady = false;
@@ -89,9 +110,22 @@ public class GameStateManger : MonoBehaviour
                 case GameState.popping: PopState(); break;
                 case GameState.dropping: DropState(); break;
                 case GameState.addLines: AddLineState(); break;
+                case GameState.EndingGame: EndGame(); break;
+                case GameState.GameOver: GameOver(); break;
                 default: IdleState(); break;
             }   
         }
+    }
+
+    private void GameOver()
+    {
+        return;
+    }
+
+    private void EndGame()
+    {
+        GameOverScreen.SetTrigger("death");
+        nextState  = GameState.GameOver;
     }
 
     /// 
@@ -115,8 +149,12 @@ public class GameStateManger : MonoBehaviour
         }
         else 
         {
-            CurrentChain = 0;
-            if (addLineWhenReady && !OrbBeingMoved)
+            score.resetChain();
+            if (board.isGameOver())
+            {
+                nextState = GameState.EndingGame;
+            }
+            else if (addLineWhenReady && !OrbBeingMoved)
             {
                 nextState = GameState.addLines;
                 addLineWhenReady = false;
@@ -132,7 +170,6 @@ public class GameStateManger : MonoBehaviour
         {
             nextState = GameState.initPop;
             popCountDown = POP_TIMER;
-            CurrentChain++;
         }
         else 
         {
@@ -143,7 +180,7 @@ public class GameStateManger : MonoBehaviour
 
     private void PopInit()
     {
-        board.StartPoppingAllReadyOrbs();
+        score.scoreBlock(board.StartPoppingAllReadyOrbs());
         nextState = GameState.popping;
         popCountDown = POP_TIMER;
     }
@@ -155,6 +192,7 @@ public class GameStateManger : MonoBehaviour
         if (popCountDown <= 0)
         { 
             board.endPoppingAllOrbs();
+            score.finializePop();
             board.MarkAllDisplacedOrbs();
         
             if (board.OrbsCurrentlyDisplaced())
@@ -187,10 +225,15 @@ public class GameStateManger : MonoBehaviour
     private void AddLineState()
     {
         board.dropLines(incomingSend);
-        linedropTimer = DROP_TIMER_MAX;
+        restLineDropTimer();
+        if (DebugMode)
+        {
+            maxtime.text = linedropTimer.ToString();
+        }
         addLineWhenReady = false;
         Debug.Log("TEST");
-
+        dropArrow.SetBool("Switching", false);
+        dropArrow.SetTrigger("orbs Dropped");
         nextState = GameState.idle;
     }
 
@@ -267,8 +310,12 @@ public class GameStateManger : MonoBehaviour
 
     public void DEBUGstatWatcher()
     {
-        DEBUGCurState.text = curState.ToString();
-        DEBUGNextState.text = nextState.ToString();
+
+        if (DebugMode)
+        {
+            DEBUGCurState.text = curState.ToString();
+            DEBUGNextState.text = nextState.ToString();
+        }
     }
 
 
@@ -310,14 +357,14 @@ public class GameStateManger : MonoBehaviour
     public bool Evaluate()
     {
         bool[,] evalMemo;
-        evalMemo = new bool[GameBoard.BOARD_WIDTH,GameBoard.BOARD_HIGHT];
+        evalMemo = new bool[GameBoard.BOARD_WIDTH,board.longestHight()];
         Queue<Orb> orbsToSet;
         orbsToSet = new Queue<Orb>();
         bool OrbsNeedToPop = false;
 
         for (int c = 0; c < GameBoard.BOARD_WIDTH; c++)
         {
-            for (int r = 0; r < GameBoard.BOARD_HIGHT; r++)
+            for (int r = 0; r < board.longestHight(); r++)
             {
                 if (!evalMemo[c,r])
                 {
@@ -365,7 +412,7 @@ public class GameStateManger : MonoBehaviour
     {
 
         // if we are out of bounds exit
-        if (x < 0 || x >= GameBoard.BOARD_WIDTH || y < 0 || y >= GameBoard.BOARD_HIGHT || evalMemo[x,y])
+        if (x < 0 || x >= GameBoard.BOARD_WIDTH || y < 0 || y >= board.longestHight() || evalMemo[x,y])
         {
             return false;
         } 
@@ -401,5 +448,15 @@ public class GameStateManger : MonoBehaviour
 
             return (center || right || down || up || left);
         }
+    }
+
+    public void restLineDropTimer()
+    {
+        linedropTimer = DROP_TIMER_MAX - (Mathf.Log10(score.level)*3);
+    }
+
+    public float getMaxOrbDropTimer()
+    {
+        return DROP_TIMER_MAX - (Mathf.Log10(score.level)*3);
     }
 }

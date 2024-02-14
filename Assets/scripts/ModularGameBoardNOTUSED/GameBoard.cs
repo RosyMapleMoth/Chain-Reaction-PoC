@@ -29,7 +29,7 @@ public class GameBoard : MonoBehaviour
     private int orbIDNext = 0;
     public LinkedList<GameObject>[] board;
     public LinkedList<GameObject>[] incomingLines;
-    public Text debug;
+    public Text debug_text;
     public bool ContenctRequiresEval;
     public float timera = 0.5f;
     public OrbManipulator orbManipulator;
@@ -281,7 +281,7 @@ public class GameBoard : MonoBehaviour
                 float elapsedTime = 0; // set counter to 0
                 float waitTime = dropTime; // set total wait time based on how far 
                 Vector3 startPosition = moving.position;
-                Vector3 endPosition = new Vector3(SPAWN_X_VAL + (X_OFF_SET*(col-1)) + col, (SPAWN_Y_Val - 1.30f - depth - (Y_OFF_SET * depth)), 0f);
+                Vector3 endPosition = new Vector3(transform.position.x + SPAWN_X_VAL + (X_OFF_SET*(col-1)) + col, (SPAWN_Y_Val - 1.30f - depth - (Y_OFF_SET * depth)), 0f);
                 Debug.Log(endPosition);
                 while (elapsedTime < waitTime)
                 {
@@ -356,8 +356,7 @@ public class GameBoard : MonoBehaviour
             }
             temp += "\n|";
         }
-
-        debug.text = temp;
+        Debug.Log(temp);
     }
 
 
@@ -368,8 +367,9 @@ public class GameBoard : MonoBehaviour
     /// <summary>
     /// Starts the poping animation and sets orb stat to the popping state for all orbs in the ready to pop state.
     /// </summary>
-    public void StartPoppingAllReadyOrbs()
+    public int StartPoppingAllReadyOrbs()
     {
+        int orbsPoping = 0;
         foreach (LinkedList<GameObject> Col in board) 
         {
             foreach (GameObject orb in Col) 
@@ -379,12 +379,14 @@ public class GameBoard : MonoBehaviour
                 Debug.Log("Checking orb " + orb.name + " in state " + temporb.curState); 
                 if (temporb.ReadyToPop())
                 {
+                    orbsPoping++;
                     Debug.unityLogger.Log("Start Orb Pop", temporb + " has begun To Pop");
                     orb.GetComponentInChildren<Animator>().SetTrigger("pop");
                     temporb.curState = Orb.OrbState.Poping;
                 }
             } 
         }
+        return orbsPoping;
     }
 
 
@@ -495,6 +497,31 @@ public class GameBoard : MonoBehaviour
         ContenctRequiresEval = false;
     } 
 
+    public bool isGameOver()
+    {
+        foreach (LinkedList<GameObject> col in board)
+        {
+            if (col.Count >= BOARD_HIGHT)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public int longestHight()
+    {
+        int longest = 0;
+        foreach (LinkedList<GameObject> col in board)
+        {
+            if (col.Count > longest)
+            {
+                longest = col.Count;
+            }
+        }
+        return longest;
+    }
 
 
     public Vector3 getRelativeDropPoint(int col)

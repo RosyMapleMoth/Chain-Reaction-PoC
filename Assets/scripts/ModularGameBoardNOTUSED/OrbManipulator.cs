@@ -131,7 +131,7 @@ public class OrbManipulator : MonoBehaviour
                 temp.transform.localPosition = new Vector3(0,OrbsBeingDropped - (GameBoard.Y_OFF_SET) *(heldOrbs.Count),0);
                 OrbsBeingDropped++;
             }
-            DropOrb(DroppingOrbs, col, 0.25f - 0.01f * board.GetColSize( col ));
+            DropOrb(DroppingOrbs, col, 0.15f - 0.01f * board.GetColSize( col ));
         }
     }
 

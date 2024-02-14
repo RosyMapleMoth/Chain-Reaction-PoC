@@ -37,7 +37,7 @@ public class score : MonoBehaviour
 
     public void resetChain()
     {
-        chain = 0;
+        chain = 1;
     }
 
     public void incressChain()
@@ -50,6 +50,12 @@ public class score : MonoBehaviour
         return chain;
     }
 
+    public void scoreBlock(int SizeOfBlock)
+    {
+        incomingChange += SizeOfBlock * (chain) * multiplyer;
+        incressChain();
+        Debug.Log("Score : adding " + SizeOfBlock * chain * multiplyer + " To player score");
+    }
 
     public void scoreBlock()
     {
@@ -74,11 +80,14 @@ public class score : MonoBehaviour
 
         ScoreVal += incomingChange;
         addedScore.text = incomingChange.ToString();
-        Chain.text = (chain + 1).ToString();
+        Chain.text = (chain).ToString();
 
         if (ScoreVal > level * xpRequirement)
         {
-            level++;
+            while (ScoreVal - level * xpRequirement > level * xpRequirement)
+            {
+                level++;
+            }
         }
 
         incomingChange = 0;
