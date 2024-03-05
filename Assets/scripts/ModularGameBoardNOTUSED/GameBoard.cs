@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +15,7 @@ using UnityEngine.UI;
  */
 public class GameBoard : MonoBehaviour
 {
+    // MAGIC NUMBER HELL
     public static int SPAWN_Y_Val = 7;
     public static float SPAWN_X_VAL = -4;
     public static float X_OFF_SET = 0.1250f;
@@ -23,6 +24,8 @@ public class GameBoard : MonoBehaviour
     public static int BOARD_WIDTH = 7;
     public static int BOARD_HIGHT = 13;
 
+
+    // actual functions
     public GameObject orbPrefab;
     public GameObject phsyicalBoard;
     public Line DEBUGline;
@@ -281,7 +284,7 @@ public class GameBoard : MonoBehaviour
                 float elapsedTime = 0; // set counter to 0
                 float waitTime = dropTime; // set total wait time based on how far 
                 Vector3 startPosition = moving.position;
-                Vector3 endPosition = new Vector3(transform.position.x + SPAWN_X_VAL + (X_OFF_SET*(col-1)) + col, (SPAWN_Y_Val - 1.30f - depth - (Y_OFF_SET * depth)), 0f);
+                Vector3 endPosition = new Vector3(transform.position.x + SPAWN_X_VAL + (X_OFF_SET*(col-1)) + col, GetRelativeSpawnY() - ((depth+1) * Y_OFF_SET) - (depth+1) , 0f);
                 Debug.Log(endPosition);
                 while (elapsedTime < waitTime)
                 {
@@ -425,7 +428,7 @@ public class GameBoard : MonoBehaviour
             if (node != null)
             {
                 int depth = 0;
-                if (checkNode(node.Value.transform.position, new Vector3(0,phsyicalBoard.transform.position.y,0),depth))
+                if (checkNode(node.Value.transform.localPosition, new Vector3(0,phsyicalBoard.transform.localPosition.y,0),depth))
                 {
                     Debug.Log("FALLMARK : Marking orb " + node.Value.name + " as falling");
                     node.Value.GetComponent<Orb>().curState =  Orb.OrbState.Falling;
@@ -438,7 +441,7 @@ public class GameBoard : MonoBehaviour
                 {
                     depth++;
                     node = node.Next;
-                    if (checkNode(node.Value.transform.position, node.Previous.Value.transform.position,depth))
+                    if (checkNode(node.Value.transform.localPosition, new Vector3(0,phsyicalBoard.transform.localPosition.y,0),depth))
                     {
                         Debug.Log("FALLMARK : Marking orb " + node.Value.name + " as falling");
                         node.Value.GetComponent<Orb>().curState =  Orb.OrbState.Falling;
@@ -452,9 +455,11 @@ public class GameBoard : MonoBehaviour
 
     public bool checkNode(Vector3 node, Vector3 ancor, int depth)
     {
-        Debug.Log("FALLMARK : orb at " + node.y + " is being checked with " + ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth ) - 1.375) + " for dif of " + (node.y - ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth)-1.375)));
-        Debug.Log("FALLMARK" + (node.y - ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth ) - 1.375) != 0));
-        return (node.y != ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth ) - 1.375));
+        Debug.Log("FALLMARK : orb at " + (node.y + ancor.y) + " is being checked with " + (-depth - (Y_OFF_SET * Mathf.Max(depth,0) + 0.25f)) + " for dif of " + ((node.y + ancor.y) - (-depth - (Y_OFF_SET * Mathf.Max(depth,0) + 0.25f))));
+        Debug.Log("FALLMARK" + (node.y - ((SPAWN_Y_Val - Y_OFF_SET * (depth -1) - depth )) != 0));
+        
+        //return (node.y != (ancor.y) - depth - 1);
+        return !(Mathf.Approximately((node.y + ancor.y),  (-depth - (Y_OFF_SET * Mathf.Max(depth,0) + 0.25f))));
         
     }
 

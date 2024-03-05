@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu/Main menu.unity
     guid: cde2e605ad6537a4ab7fed32efe307c3
   - enabled: 1
-    path: Assets/Scenes/Single Player Scenes/SinglePlayer.unity
+    path: Assets/Scenes/Single Player Scenes/DEPSinglePlayer.unity
     guid: 14fcc57682be5e145a1a4784d1870d32
   - enabled: 1
     path: Assets/Scenes/Menu/Settings.unity
