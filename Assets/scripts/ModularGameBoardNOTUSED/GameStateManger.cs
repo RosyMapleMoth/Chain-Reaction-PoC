@@ -21,7 +21,7 @@ public class GameStateManger : MonoBehaviour
     public TextMeshProUGUI maxtime;
     public enum GameState {idle, addLines, evaluate, initPop, popping, dropping, EndingGame, GameOver};
     private static float POP_TIMER = 1.0f;
-    private static float DROP_TIMER_MAX = 6f; 
+    private static float DROP_TIMER_MAX = 5f; 
     private static int POP_AT_ORB_COUNT = 3;
     public bool evalWhenReady = false;
     private bool grabWhenReady = false;
@@ -452,7 +452,7 @@ public class GameStateManger : MonoBehaviour
 
     public void restLineDropTimer()
     {
-        linedropTimer = DROP_TIMER_MAX - (Mathf.Log10(score.level)*3);
+        linedropTimer = DROP_TIMER_MAX - (Mathf.Pow(Mathf.Log10(score.level),2)); // look at this on demose if you want to know why this is the alg
     }
 
     public float getMaxOrbDropTimer()

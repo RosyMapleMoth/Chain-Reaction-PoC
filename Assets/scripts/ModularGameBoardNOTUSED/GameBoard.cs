@@ -15,7 +15,11 @@ using UnityEngine.UI;
  */
 public class GameBoard : MonoBehaviour
 {
-    // MAGIC NUMBER HELL
+
+    public enum SPAWNMODE {DEBUG, random, order}
+    public SPAWNMODE myMode; 
+
+    // Hard coded numbers based on the sprite we are using for our backround ONLY MODIFY THESE IF WE CHANGE BACKROUNDS or other core featuews like board size
     public static int SPAWN_Y_Val = 7;
     public static float SPAWN_X_VAL = -4;
     public static float X_OFF_SET = 0.1250f;
@@ -25,25 +29,27 @@ public class GameBoard : MonoBehaviour
     public static int BOARD_HIGHT = 13;
 
 
-    // actual functions
     public GameObject orbPrefab;
     public GameObject phsyicalBoard;
-    public Line DEBUGline;
+    public List<Line> randomLines;
+    public Pattern orderedLines;
+
+    private int patternIndex = 0;
     private int orbIDNext = 0;
-    public LinkedList<GameObject>[] board;
-    public LinkedList<GameObject>[] incomingLines;
+    private LinkedList<GameObject>[] board;
+    private LinkedList<GameObject>[] incomingLines;
+    private bool ContenctRequiresEval;
+    private int OrbsFalling = 0;
+    
+    [Header("Debug Settings")]
     public Text debug_text;
-    public bool ContenctRequiresEval;
-    public float timera = 0.5f;
-    public OrbManipulator orbManipulator;
-    public bool DisplacedOrbs = false;
-    public int OrbsFalling = 0;
+    public float DebugTimer = 0.5f;
+    public Line DEBUGline;
 
     void Start()
     {
-        Debug.Log("WuW");
         initGameBoard();
-        dropLines(2);
+        dropLines(6);
         ContenctRequiresEval = false;
         Application.targetFrameRate = 145;
     }
@@ -51,14 +57,14 @@ public class GameBoard : MonoBehaviour
 
     void Update()
     {
-        if (timera > 0)
+        if (DebugTimer > 0)
         {
-            timera -= Time.deltaTime;
+            DebugTimer -= Time.deltaTime;
         }
         else
         {
             updateDebug();
-            timera = 0.5f;
+            DebugTimer = 0.5f;
         }
     }
 
@@ -129,7 +135,22 @@ public class GameBoard : MonoBehaviour
     {
         while (incomingLines[0].Count < linesToDrop)
         {
-            createLine(DEBUGline);
+            switch (myMode) {
+                case SPAWNMODE.DEBUG:
+                    createLine(DEBUGline);
+                    break;
+                case SPAWNMODE.random:
+                    createLine(randomLines[Random.Range(0,randomLines.Count)]);
+                    break;
+                case SPAWNMODE.order:
+                    createLine(orderedLines.lines[patternIndex % orderedLines.lines.Length]);
+                    patternIndex++;
+                    break;
+                default:
+                    Debug.LogError("SPAWNMODE NOT SET");
+                    break;
+            }
+            
         }
         for (int i = 0; i < linesToDrop; i++)
         {
