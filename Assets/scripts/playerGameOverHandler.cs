@@ -6,12 +6,14 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Users;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
+
 
 public class playerGameOverHandler : MonoBehaviour
 {
     public UnityEvent OptionSelected = new UnityEvent();
     public UnityEvent OptionDeselected = new UnityEvent();
-    public Text GameOverText;
+    public TextMeshProUGUI GameOverText;
     public PlayerInput player;
     public InputDevice myDevice;
 

@@ -184,7 +184,7 @@ public class playerAddController : MonoBehaviour
                     break;
                 case 2:
                     Save();
-                    SceneManager.LoadScene("Two Player");
+                    SceneManager.LoadScene("two player mod");
                     break;
                 case 3:
                     Save();

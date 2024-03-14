@@ -156,7 +156,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &8390896178721287362
 Animator:
-  serializedVersion: 3
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -169,10 +169,12 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8390896178777344060
 GameObject:
   m_ObjectHideFlags: 0
@@ -350,6 +352,7 @@ GameObject:
   - component: {fileID: 8390896178804460675}
   - component: {fileID: 8390896178804460676}
   - component: {fileID: 8390896178804460673}
+  - component: {fileID: 1157435057640879174}
   m_Layer: 5
   m_Name: GameOver
   m_TagString: Untagged
@@ -440,7 +443,7 @@ MonoBehaviour:
     m_Bits: 4294967295
 --- !u!95 &8390896178804460673
 Animator:
-  serializedVersion: 3
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -453,10 +456,35 @@ Animator:
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1157435057640879174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8390896178804460678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52f611e4b229b864b9ef40705675090b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OptionSelected:
+    m_PersistentCalls:
+      m_Calls: []
+  OptionDeselected:
+    m_PersistentCalls:
+      m_Calls: []
+  GameOverText: {fileID: 8390896179560460214}
+  player: {fileID: 8390896179666505914}
+  GameOverUi: {fileID: 8390896179127230782}
+  GameOverbackroundUi: {fileID: 8390896178804460678}
+  hovered: 0
 --- !u!1 &8390896178817207689
 GameObject:
   m_ObjectHideFlags: 0
@@ -1145,7 +1173,7 @@ GameObject:
   - component: {fileID: 8390896179560460213}
   - component: {fileID: 8390896179560460214}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: game over text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1491,16 +1519,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eed901d7b8b609f47b4dc9452417757d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myMode: 0
   orbPrefab: {fileID: 9078092447020789734, guid: 3526c24fe37d793479ceee665d61f179,
     type: 3}
   phsyicalBoard: {fileID: 8390896178789269804}
-  DEBUGline: {fileID: 11400000, guid: 84b06f3eeb7554348969b403720f6976, type: 2}
+  randomLines: []
+  orderedLines: {fileID: 0}
   debug_text: {fileID: 0}
-  ContenctRequiresEval: 0
-  timera: 4
-  orbManipulator: {fileID: 8390896179697769746}
-  DisplacedOrbs: 0
-  OrbsFalling: 0
+  DebugTimer: 0.5
+  DEBUGline: {fileID: 11400000, guid: 84b06f3eeb7554348969b403720f6976, type: 2}
 --- !u!114 &8390896179664915962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1515,6 +1542,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   board: {fileID: 8390896179664915964}
   orbTransport: {fileID: 8390896179697769746}
+  GameOverDel:
+    m_PersistentCalls:
+      m_Calls: []
   score: {fileID: 5620026600644489888}
   DebugMode: 0
   GameOverScreen: {fileID: 8390896178804460673}
@@ -1975,7 +2005,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3584906, g: 0.32297972, b: 0.32297972, a: 1}
+  m_Color: {r: 0.3584906, g: 0.32297972, b: 0.32297972, a: 0.83137256}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

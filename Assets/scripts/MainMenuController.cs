@@ -24,7 +24,7 @@ public class MainMenuController : MonoBehaviour
 
     public void singlePlayer()
     {
-        SceneManager.LoadScene("SinglePlayer");
+        SceneManager.LoadScene("single player Modular");
     }
 
     public void exit()

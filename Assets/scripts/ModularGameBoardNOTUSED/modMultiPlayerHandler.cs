@@ -28,7 +28,7 @@ public class modMultiPlayerHandler : MonoBehaviour
             int j = i;
 
             // set up player loss Listener 
-            Players[i].transform.GetComponentInParent<BoardManager>().GameOver.AddListener(delegate
+            Players[i].transform.GetComponentInParent<GameStateManger>().GameOverDel.AddListener(delegate
             {
                 Debug.Log("player " + j +  " eleminated"); 
                 playerLoss(j);

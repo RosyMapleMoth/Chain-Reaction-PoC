@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class GameStateManger : MonoBehaviour
 {
     public GameBoard board;
     public OrbManipulator orbTransport;
-    
+    public UnityEvent GameOverDel = new UnityEvent();
     public scoreTMP score;
     public bool DebugMode;
     public Animator GameOverScreen;
@@ -124,6 +125,7 @@ public class GameStateManger : MonoBehaviour
 
     private void EndGame()
     {
+        GameOverDel.Invoke();
         GameOverScreen.SetTrigger("death");
         nextState  = GameState.GameOver;
     }

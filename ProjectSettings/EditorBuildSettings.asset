@@ -32,9 +32,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/multiplayer/Two Player.unity
     guid: 8f0a9a2f4cba24957805104200fffb7d
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/test.unity
-    guid: 677779696017ac74bbddc4f9e45278fd
+    path: Assets/two player mod.unity
+    guid: 14af705470fb6fb4e96fa0e628b9c3bb
+  - enabled: 1
+    path: Assets/single player Modular.unity
+    guid: 3220d65df7210d94395f43d09d3c20fc
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 5ac85f0ce3f1021488906f35b9d8e12f,
       type: 2}
