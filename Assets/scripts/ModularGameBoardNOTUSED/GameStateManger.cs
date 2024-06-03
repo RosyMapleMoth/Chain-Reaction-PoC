@@ -226,7 +226,7 @@ public class GameStateManger : MonoBehaviour
 
     private void AddLineState()
     {
-        board.dropLines(incomingSend);
+        board.dropLines(Math.Max(1,score.level / 3));
         restLineDropTimer();
         if (DebugMode)
         {

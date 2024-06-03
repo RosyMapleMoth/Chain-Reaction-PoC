@@ -24,13 +24,13 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu/add players.unity
     guid: 3a95564cb81ff3d468bc26f2cf4be85a
   - enabled: 1
-    path: Assets/Scenes/multiplayer/Four Player.unity
+    path: Assets/Scenes/multiplayer/Legacy/Four Player.unity
     guid: 0ea54755407b843e9abd4c84923607c3
   - enabled: 1
-    path: Assets/Scenes/multiplayer/Three Player.unity
+    path: Assets/Scenes/multiplayer/Legacy/Three Player.unity
     guid: 38b118b8938154fbcbc44346175caff8
   - enabled: 1
-    path: Assets/Scenes/multiplayer/Two Player.unity
+    path: Assets/Scenes/multiplayer/Legacy/Two Player.unity
     guid: 8f0a9a2f4cba24957805104200fffb7d
   - enabled: 0
     path: 

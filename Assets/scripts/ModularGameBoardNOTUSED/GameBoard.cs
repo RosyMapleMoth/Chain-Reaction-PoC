@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 
@@ -15,7 +16,7 @@ using UnityEngine.UI;
  */
 public class GameBoard : MonoBehaviour
 {
-
+    public List<Transform> boardAncors;
     public enum SPAWNMODE {DEBUG, random, order}
     public SPAWNMODE myMode; 
 
@@ -474,6 +475,14 @@ public class GameBoard : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Check for valid node position. invalid node positions will need to fall.
+    /// </summary>
+    /// <param name="node"></param>
+    /// <param name="ancor"></param>
+    /// <param name="depth"></param>
+    /// <returns></returns>
     public bool checkNode(Vector3 node, Vector3 ancor, int depth)
     {
         Debug.Log("FALLMARK : orb at " + (node.y + ancor.y) + " is being checked with " + (-depth - (Y_OFF_SET * Mathf.Max(depth,0) + 0.25f)) + " for dif of " + ((node.y + ancor.y) - (-depth - (Y_OFF_SET * Mathf.Max(depth,0) + 0.25f))));
@@ -549,6 +558,19 @@ public class GameBoard : MonoBehaviour
         return longest;
     }
 
+    public Transform GetlastOrbInCol(int col)
+    {
+        Assert.IsTrue(col >= 0 && col < BOARD_WIDTH);
+        if (board[col].Count > 0)
+        {
+            return board[col].Last.Value.transform;
+        }
+        else
+        {
+            return boardAncors[col];
+        }
+
+    }
 
     public Vector3 getRelativeDropPoint(int col)
     {

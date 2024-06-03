@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -7,13 +8,17 @@ public class OrbManipulator : MonoBehaviour
 {
     public GameBoard board;
     public UnityEvent DroppingOrbsEvt;
+    public UnityEvent GrabbingOrbsEvt;
     public GameStateManger manager;
     public Stack<GameObject> heldOrbs;
     public OrbType curHeldType;
+    public int DropRow =-1;
     public Transform GrabbedOrbs;
     public Transform DroppingOrbs;
     public int OrbsBeingPickedUp = 0;
     public int OrbsBeingDropped = 0;
+
+    public float shotspeed = 0.025f;
 
 
     // Start is called before the first frame update
@@ -49,6 +54,24 @@ public class OrbManipulator : MonoBehaviour
             while (board.GetColSize(col) > 0 && board.GetOrbType(col) == curHeldType && board.CanPickUp(col))
             {
                 heldOrbs.Push(board.GrabOrb(col));
+                PickUpOrb(heldOrbs.Peek().transform);
+                manager.ManipulatingOrb();
+            }
+        }
+        // handle in air orbs
+        else if (DropRow == col && DroppingOrbs.childCount > 0)
+        {
+            GrabbingOrbsEvt.Invoke();
+            curHeldType = DroppingOrbs.GetComponentInChildren<Orb>().orbScript.orbType;
+            heldOrbs.Push(DroppingOrbs.GetChild(0).gameObject);
+            DroppingOrbs.GetChild(0).SetParent(null);
+            PickUpOrb(heldOrbs.Peek().transform);
+            manager.ManipulatingOrb();
+
+            while (DroppingOrbs.childCount > 0)
+            {
+                heldOrbs.Push(DroppingOrbs.GetChild(0).gameObject);
+                DroppingOrbs.GetChild(0).SetParent(null);
                 PickUpOrb(heldOrbs.Peek().transform);
                 manager.ManipulatingOrb();
             }
@@ -122,6 +145,7 @@ public class OrbManipulator : MonoBehaviour
         {
             manager.ManipulatingOrb();
             DroppingOrbsEvt.Invoke();
+            DropRow = col;
             DroppingOrbs.position = board.getRelativeOragin() + new Vector3(col + col*GameBoard.X_OFF_SET, -GameBoard.BOARD_HIGHT-3,0f);
             while (heldOrbs.Count > 0)
             {
@@ -131,7 +155,8 @@ public class OrbManipulator : MonoBehaviour
                 temp.transform.localPosition = new Vector3(0,OrbsBeingDropped - (GameBoard.Y_OFF_SET) *(heldOrbs.Count),0);
                 OrbsBeingDropped++;
             }
-            DropOrb(DroppingOrbs, col, 0.15f - 0.01f * board.GetColSize( col ));
+            /// BOARD_HIGHT - col size to get total squars away from shooter then multipler by shot speed
+            DropOrb(DroppingOrbs, col, shotspeed * (GameBoard.BOARD_HIGHT - board.GetColSize( col )),board.GetlastOrbInCol(col));
         }
     }
 
@@ -166,7 +191,7 @@ public class OrbManipulator : MonoBehaviour
                     }
                     catch
                     {
-
+                        Debug.Log("FUCK IT hAPPEND");
                     }
                     elapsedTime += Time.deltaTime;
                     yield return null;
@@ -192,6 +217,54 @@ public class OrbManipulator : MonoBehaviour
                     
                 }
                 Debug.Log("all dropping orbs are placed");
+                yield return null;
+            }
+
+            StartCoroutine(MoveToSpot());
+    }
+
+
+
+    public void DropOrb(Transform moving, int col, float dropTime, Transform EndPos)
+    {
+        bool earlyEnd = false;
+        void earlyEndInvoke()
+        {
+            earlyEnd = true;
+        }
+        IEnumerator MoveToSpot()
+            { 
+                GrabbingOrbsEvt.AddListener(earlyEndInvoke);
+                float elapsedTime = 0; // set counter to 0
+                float waitTime = dropTime; // set total wait time based on how far 
+                Vector3 startPosition = moving.position;
+                Debug.Log("DEBUG: start Position "  +startPosition);
+                while (elapsedTime < waitTime && !earlyEnd)
+                {
+                    moving.position = Vector3.Lerp( startPosition, 
+                                                    board.GetlastOrbInCol(col).position - new Vector3(0,moving.childCount+ 0.125f,0),
+                                                    Mathf.Clamp((elapsedTime / waitTime), 0, 1));
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+                
+                if (!earlyEnd)
+                {
+                    // Snap to proper position if we somehow ended with out hitting the correct position
+                    moving.position = Vector3.Lerp( startPosition, 
+                                                    board.GetlastOrbInCol(col).position - new Vector3(0,moving.childCount+ 0.125f,0),
+                                                    1);
+                    Debug.Log("DEBUG: Final startPosition "  + startPosition);
+                    manager.RequestPutOrb(col, moving.transform);
+                    OrbsBeingDropped = 0;
+                }
+                else
+                {
+                    /// Free up whatever is blocking
+                    OrbsBeingDropped = 0;
+                }
+                DropRow = -1;
+                GrabbingOrbsEvt.RemoveListener(earlyEndInvoke);
                 yield return null;
             }
 
